@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Task } from "@agenthive/shared";
-import HexCanvas, { CanvasContext } from "../components/HexCanvas";
+import HexCanvas, { type HexCanvasHandle } from "../components/HexCanvas";
 import HexGrid from "../components/HexGrid";
 import LogoCell from "../components/LogoCell";
 import FunctionCell from "../components/FunctionCell";
@@ -9,9 +9,10 @@ import TaskCell from "../components/TaskCell";
 import ColumnHeaders from "../components/ColumnHeaders";
 import DependencyLines from "../components/DependencyLines";
 import SidePanel from "../components/SidePanel";
-import MiniMap from "../components/MiniMap";
 import Toolbar from "../components/Toolbar";
 import ZoomControls from "../components/ZoomControls";
+import StatusLegend from "../components/StatusLegend";
+import { hexHeight, hexWidth, hexToPixel } from "../utils/hex";
 import type { HexCoord } from "../utils/hex";
 
 const STATUS_COLUMNS: Record<string, number> = {
@@ -31,6 +32,17 @@ const COLUMN_DEFS = [
   { col: 0, label: "运行中", color: "#eab308" },
   { col: 1, label: "审查", color: "#8b5cf6" },
   { col: 2, label: "完成", color: "#10b981" },
+];
+
+const FUNC_COLOR = "#6366f1";
+
+const FUNCTION_DEFS = [
+  { col: -3, row: 0, label: "设置" },
+  { col: -2, row: 0, label: "Skill" },
+  { col: -1, row: 0, label: "对话" },
+  { col: 1, row: 0, label: "文件" },
+  { col: 2, row: 0, label: "提交" },
+  { col: 3, row: 0, label: "用量" },
 ];
 
 function getAuthHeaders() {
@@ -57,29 +69,41 @@ function CanvasInner({
   gridVisible,
   depVisible,
   hoveredTaskId,
+  funcPositions,
   onTaskClick,
   onTaskDragEnd,
   onTaskHover,
+  onFuncDragEnd,
 }: {
   tasks: Task[];
   gridVisible: boolean;
   depVisible: boolean;
   hoveredTaskId: string | null;
+  funcPositions: Record<string, HexCoord>;
   onTaskClick: (task: Task) => void;
   onTaskDragEnd: (taskId: string, coord: HexCoord) => void;
   onTaskHover: (taskId: string | null) => void;
+  onFuncDragEnd: (label: string, coord: HexCoord) => void;
 }) {
   return (
     <>
-      <HexGrid visible={gridVisible} rows={12} cols={8} />
+      <HexGrid visible={gridVisible} />
       <DependencyLines tasks={tasks} visible={depVisible} hoveredTaskId={hoveredTaskId} />
       <LogoCell />
-      <FunctionCell col={-3} label="设置" onClick={() => {}} />
-      <FunctionCell col={-2} label="Skill" onClick={() => {}} />
-      <FunctionCell col={-1} label="对话" onClick={() => {}} />
-      <FunctionCell col={1} label="文件" onClick={() => {}} />
-      <FunctionCell col={2} label="提交" onClick={() => {}} />
-      <FunctionCell col={3} label="用量" onClick={() => {}} />
+      {FUNCTION_DEFS.map((def) => {
+        const pos = funcPositions[def.label] ?? { col: def.col, row: def.row };
+        return (
+          <FunctionCell
+            key={def.label}
+            col={pos.col}
+            row={pos.row}
+            label={def.label}
+            color={FUNC_COLOR}
+            onClick={() => {}}
+            onDragEnd={onFuncDragEnd}
+          />
+        );
+      })}
       <ColumnHeaders
         columns={COLUMN_DEFS.map((def) => ({
           ...def,
@@ -106,11 +130,12 @@ export function Canvas() {
   const [gridVisible, setGridVisible] = useState(true);
   const [depVisible, setDepVisible] = useState(false);
   const [autoExecute, setAutoExecute] = useState(true);
-  const [zoom, setZoom] = useState(1);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [canvasState, setCanvasState] = useState({ panX: 0, panY: 0, zoom: 1 });
+  const [funcPositions, setFuncPositions] = useState<Record<string, HexCoord>>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HexCanvasHandle>(null);
 
   useEffect(() => {
     fetch("/api/projects", { headers: getAuthHeaders() })
@@ -140,12 +165,13 @@ export function Canvas() {
     );
   }, []);
 
-  const handleZoomIn = useCallback(() => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(1))), []);
-  const handleZoomOut = useCallback(() => setZoom((z) => Math.max(0.3, +(z - 0.1).toFixed(1))), []);
-  const handleZoomReset = useCallback(() => setZoom(1), []);
+  const handleFuncDragEnd = useCallback((label: string, coord: HexCoord) => {
+    setFuncPositions((prev) => ({ ...prev, [label]: coord }));
+  }, []);
 
-  const containerWidth = containerRef.current?.clientWidth ?? window.innerWidth;
-  const containerHeight = containerRef.current?.clientHeight ?? window.innerHeight - 48;
+  const h = hexHeight();
+  const initialPanX = (containerRef.current?.clientWidth ?? window.innerWidth) / 2;
+  const initialPanY = h * 0.75 + h / 2;
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -184,26 +210,23 @@ export function Canvas() {
       </header>
 
       <div ref={containerRef} style={{ flex: 1, position: "relative" }}>
-        <HexCanvas onStateChange={setCanvasState}>
+        <HexCanvas ref={canvasRef} onStateChange={setCanvasState} initialPanX={initialPanX} initialPanY={initialPanY}>
           <CanvasInner
             tasks={tasks}
             gridVisible={gridVisible}
             depVisible={depVisible}
             hoveredTaskId={hoveredTaskId}
+            funcPositions={funcPositions}
             onTaskClick={setSelectedTask}
             onTaskDragEnd={handleTaskDragEnd}
             onTaskHover={setHoveredTaskId}
+            onFuncDragEnd={handleFuncDragEnd}
           />
         </HexCanvas>
 
         <SidePanel task={selectedTask} onClose={() => setSelectedTask(null)} />
 
-        <MiniMap
-          tasks={tasks}
-          canvasState={canvasState}
-          containerWidth={containerWidth}
-          containerHeight={containerHeight}
-        />
+        <StatusLegend />
 
         <Toolbar
           gridVisible={gridVisible}
@@ -217,10 +240,27 @@ export function Canvas() {
         />
         <ZoomControls
           zoom={canvasState.zoom}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onZoomReset={handleZoomReset}
-          onFitAll={() => {}}
+          onZoomIn={() => canvasRef.current?.zoomIn()}
+          onZoomOut={() => canvasRef.current?.zoomOut()}
+          onZoomReset={() => canvasRef.current?.zoomReset()}
+          onFitAll={() => {
+            const allCoords: HexCoord[] = [
+              { col: 0, row: 0 },
+              ...FUNCTION_DEFS.map((d) => funcPositions[d.label] ?? { col: d.col, row: d.row }),
+              ...tasks.map((t) => ({ col: t.canvas_col ?? 0, row: t.canvas_row ?? 2 })),
+            ];
+            const hw = hexWidth() / 2;
+            const hh = hexHeight() / 2;
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const c of allCoords) {
+              const p = hexToPixel(c);
+              if (p.x - hw < minX) minX = p.x - hw;
+              if (p.y - hh < minY) minY = p.y - hh;
+              if (p.x + hw > maxX) maxX = p.x + hw;
+              if (p.y + hh > maxY) maxY = p.y + hh;
+            }
+            canvasRef.current?.fitAll({ minX, minY, maxX, maxY });
+          }}
         />
       </div>
     </div>

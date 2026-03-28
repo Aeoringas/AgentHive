@@ -28,7 +28,7 @@ export default function ZoomControls({ zoom, onZoomIn, onZoomOut, onZoomReset, o
       style={{
         position: 'fixed',
         right: 20,
-        bottom: 280,
+        bottom: 20,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

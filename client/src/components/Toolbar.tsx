@@ -13,7 +13,6 @@ interface ToolbarProps {
 
 interface ToolButton {
   label: string;
-  title: string;
   active?: boolean;
   onClick: () => void;
 }
@@ -29,12 +28,12 @@ export default function Toolbar({
   onPlan,
 }: ToolbarProps) {
   const buttons: ToolButton[] = [
-    { label: '网', title: '网格', active: gridVisible, onClick: onToggleGrid },
-    { label: '自', title: '自动执行', active: autoExecute, onClick: onToggleAutoExecute },
-    { label: '整', title: '整理', onClick: onAutoArrange },
-    { label: '划', title: '规划', onClick: onPlan },
-    { label: '+', title: '新建想法', onClick: onNewIdea },
-    { label: '任', title: '新建任务', onClick: onNewTask },
+    { label: '网格', active: gridVisible, onClick: onToggleGrid },
+    { label: '自动', active: autoExecute, onClick: onToggleAutoExecute },
+    { label: '整理', onClick: onAutoArrange },
+    { label: '规划', onClick: onPlan },
+    { label: '想法', onClick: onNewIdea },
+    { label: '任务', onClick: onNewTask },
   ];
 
   return (
@@ -42,9 +41,9 @@ export default function Toolbar({
       style={{
         position: 'fixed',
         right: 20,
-        bottom: 20,
+        top: 60,
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         background: 'rgba(255,255,255,0.72)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
@@ -55,15 +54,14 @@ export default function Toolbar({
       }}
     >
       {buttons.map((btn, i) => (
-        <div key={btn.title}>
+        <div key={btn.label} style={{ display: 'flex', alignItems: 'center' }}>
           {i > 0 && (
-            <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '0 4px' }} />
+            <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.06)' }} />
           )}
           <button
-            title={btn.title}
             onClick={btn.onClick}
             style={{
-              width: 36,
+              padding: '0 14px',
               height: 36,
               display: 'flex',
               alignItems: 'center',
@@ -71,10 +69,11 @@ export default function Toolbar({
               border: 'none',
               background: btn.active ? '#4f46e5' : 'transparent',
               color: btn.active ? '#ffffff' : '#374151',
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 500,
               cursor: 'pointer',
               borderRadius: 0,
+              whiteSpace: 'nowrap',
             }}
           >
             {btn.label}

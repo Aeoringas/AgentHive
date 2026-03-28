@@ -49,7 +49,7 @@ export default function DependencyLines({
           sy: start.y,
           ex: end.x,
           ey: end.y,
-          completed: upstream.status === "done",
+          completed: upstream.status === "completed",
           fromId: depId,
           toId: task.id,
         });

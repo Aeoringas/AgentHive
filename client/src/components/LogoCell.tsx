@@ -22,8 +22,9 @@ export default function LogoCell() {
           <svg
             width={w}
             height={h}
-            viewBox={`${-w / 2} ${-h / 2} ${w} ${h}`}
-            style={{ position: 'absolute', top: 0, left: 0 }}
+            viewBox={`${-w / 2 - 2} ${-h / 2 - 2} ${w + 4} ${h + 4}`}
+            style={{ position: 'absolute', top: -2, left: -2, width: w + 4, height: h + 4 }}
+            overflow="visible"
           >
             <defs>
               <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">

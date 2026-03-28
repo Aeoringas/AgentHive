@@ -62,14 +62,15 @@ export default function TaskCell({ task, onClick, onDragEnd, onHover }: TaskCell
         <svg
           width={w}
           height={h}
-          viewBox={`${-w / 2} ${-h / 2} ${w} ${h}`}
-          style={{ position: 'absolute', top: 0, left: 0 }}
+          viewBox={`${-w / 2 - 2} ${-h / 2 - 2} ${w + 4} ${h + 4}`}
+          style={{ position: 'absolute', top: -2, left: -2, width: w + 4, height: h + 4 }}
+          overflow="visible"
         >
           <path
             d={path}
             fill="rgba(255,255,255,0.8)"
             stroke={color}
-            strokeWidth={isIntervention ? 3 : 1.5}
+            strokeWidth={isIntervention ? 3 : 2}
           />
         </svg>
         <div
