@@ -1,0 +1,73 @@
+.inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hexBorder {
+  fill: var(--surface-card);
+  stroke: var(--border-color, var(--wax));
+  stroke-width: var(--border-width, 2);
+  transition: stroke var(--duration-fast) var(--ease-default);
+}
+
+.intervention .hexBorder {
+  stroke-width: 3;
+  animation: interventionPulse 1.5s ease-in-out infinite;
+}
+
+.interrupted .hexBorder {
+  stroke-dasharray: 6 4;
+}
+
+.interruptedOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(156, 163, 175, 0.2);
+  pointer-events: none;
+}
+
+.content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  box-sizing: border-box;
+}
+
+.taskName {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: var(--leading-tight);
+  max-width: 100%;
+}
+
+.phase {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+  text-align: center;
+}

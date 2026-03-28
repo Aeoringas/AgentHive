@@ -1,5 +1,55 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { hexPath } from "../utils/hex";
+import styles from "./Setup.module.css";
+
+const LOGO_SIZE = 84;
+const STEP_HEX_SIZE = 10;
+const TOTAL_STEPS = 4;
+
+function StepIndicator({ current }: { current: number }) {
+  const stepPath = hexPath(STEP_HEX_SIZE);
+  const viewSize = STEP_HEX_SIZE * 2 + 2;
+
+  return (
+    <div className={styles.steps}>
+      {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+        const s = i + 1;
+        let fill: string;
+        let stroke: string | undefined;
+        if (s < current) {
+          fill = "var(--status-completed)";
+          stroke = undefined;
+        } else if (s === current) {
+          fill = "var(--honey-500)";
+          stroke = undefined;
+        } else {
+          fill = "transparent";
+          stroke = "var(--wax)";
+        }
+
+        return (
+          <div key={s} style={{ display: "contents" }}>
+            {i > 0 && <div className={styles.stepLine} />}
+            <svg
+              className={styles.stepHex}
+              width={STEP_HEX_SIZE * Math.sqrt(3)}
+              height={viewSize}
+              viewBox={`${-viewSize / 2} ${-viewSize / 2} ${viewSize} ${viewSize}`}
+            >
+              <path
+                d={stepPath}
+                fill={fill}
+                stroke={stroke}
+                strokeWidth={stroke ? 1.5 : 0}
+              />
+            </svg>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function Setup() {
   const navigate = useNavigate();
@@ -84,50 +134,38 @@ export function Setup() {
 
   return (
     <div className="center-container">
-      <div className="glass-card" style={{ width: 440, padding: 40 }}>
-        <h1 style={{ textAlign: "center", fontSize: 28, marginBottom: 8, color: "#1e1b4b" }}>
-          AgentHive
-        </h1>
+      <div className={`glass-card ${styles.card}`}>
+        <svg
+          className={styles.logo}
+          width={LOGO_SIZE * Math.sqrt(3)}
+          height={LOGO_SIZE * 2}
+          viewBox={`${-LOGO_SIZE * Math.sqrt(3) / 2} ${-LOGO_SIZE} ${LOGO_SIZE * Math.sqrt(3)} ${LOGO_SIZE * 2}`}
+        >
+          <defs>
+            <radialGradient id="setupLogoGrad">
+              <stop offset="0%" stopColor="var(--honey-500)" />
+              <stop offset="100%" stopColor="var(--honey-700)" />
+            </radialGradient>
+          </defs>
+          <path d={hexPath(LOGO_SIZE)} fill="url(#setupLogoGrad)" />
+        </svg>
 
-        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 32 }}>
-          {[1, 2, 3, 4].map((s) => (
-            <div
-              key={s}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 14,
-                fontWeight: 600,
-                background: s <= step ? "#4f46e5" : "#e5e7eb",
-                color: s <= step ? "#fff" : "#9ca3af",
-                transition: "all 0.3s",
-              }}
-            >
-              {s}
-            </div>
-          ))}
-        </div>
+        <h1 className={styles.title}>AgentHive</h1>
 
-        {error && (
-          <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 16, textAlign: "center" }}>
-            {error}
-          </p>
-        )}
+        <StepIndicator current={step} />
+
+        {error && <p className={styles.error}>{error}</p>}
 
         {step === 1 && (
-          <div style={{ textAlign: "center", padding: 20 }}>
-            <p style={{ fontSize: 16, color: "#374151" }}>环境检查通过</p>
+          <div className={styles.checkContent}>
+            <p className={`${styles.checkText} ${styles.checkRunning}`}>环境检查中...</p>
           </div>
         )}
 
         {step === 2 && (
           <form onSubmit={handleCreateAdmin}>
-            <h2 style={{ fontSize: 18, marginBottom: 20, color: "#374151" }}>创建管理员账号</h2>
-            <div style={{ marginBottom: 16 }}>
+            <h2 className={styles.stepTitle}>创建管理员账号</h2>
+            <div className={styles.field}>
               <input
                 type="text"
                 placeholder="用户名"
@@ -136,7 +174,7 @@ export function Setup() {
                 required
               />
             </div>
-            <div style={{ marginBottom: 24 }}>
+            <div className={styles.fieldLast}>
               <input
                 type="password"
                 placeholder="密码"
@@ -153,8 +191,8 @@ export function Setup() {
 
         {step === 3 && (
           <form onSubmit={handleCreateProject}>
-            <h2 style={{ fontSize: 18, marginBottom: 20, color: "#374151" }}>创建源项目</h2>
-            <div style={{ marginBottom: 16 }}>
+            <h2 className={styles.stepTitle}>创建源项目</h2>
+            <div className={styles.field}>
               <input
                 type="text"
                 placeholder="项目名称"
@@ -163,7 +201,7 @@ export function Setup() {
                 required
               />
             </div>
-            <div style={{ marginBottom: 16 }}>
+            <div className={styles.field}>
               <input
                 type="text"
                 placeholder="项目描述"
@@ -171,7 +209,7 @@ export function Setup() {
                 onChange={(e) => setProjectDesc(e.target.value)}
               />
             </div>
-            <div style={{ marginBottom: 24 }}>
+            <div className={styles.fieldLast}>
               <input
                 type="text"
                 placeholder="主仓库路径"
@@ -187,8 +225,8 @@ export function Setup() {
         )}
 
         {step === 4 && (
-          <div style={{ textAlign: "center", padding: 20 }}>
-            <p style={{ fontSize: 18, color: "#374151", marginBottom: 24 }}>初始化完成</p>
+          <div className={styles.completeContent}>
+            <p className={styles.completeText}>初始化完成</p>
             <button className="btn-primary" onClick={() => navigate("/")}>
               进入蜂巢空间
             </button>

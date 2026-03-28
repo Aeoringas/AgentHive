@@ -1,9 +1,10 @@
 import React from 'react';
 import { hexToPixel, hexWidth, hexHeight } from '../utils/hex';
+import type { HexCoord } from '../utils/hex';
+import styles from './HexCell.module.css';
 
 interface HexCellProps {
-  col: number;
-  row: number;
+  coord: HexCoord;
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
@@ -13,22 +14,23 @@ interface HexCellProps {
 const w = hexWidth();
 const h = hexHeight();
 
-export default function HexCell({ col, row, children, onClick, className, style }: HexCellProps) {
-  const { x, y } = hexToPixel({ col, row });
+export default function HexCell({ coord, children, onClick, className, style }: HexCellProps) {
+  const px = hexToPixel(coord);
+
+  const cellStyle = {
+    '--hex-x': px.x + 'px',
+    '--hex-y': px.y + 'px',
+    '--hex-width': w + 'px',
+    '--hex-height': h + 'px',
+    cursor: onClick ? 'pointer' : 'default',
+    ...style,
+  } as React.CSSProperties;
 
   return (
     <div
       onClick={onClick}
-      className={className}
-      style={{
-        position: 'absolute',
-        left: x - w / 2,
-        top: y - h / 2,
-        width: w,
-        height: h,
-        cursor: onClick ? 'pointer' : 'default',
-        ...style,
-      }}
+      className={`${styles.cell}${className ? ` ${className}` : ''}`}
+      style={cellStyle}
     >
       {children}
     </div>

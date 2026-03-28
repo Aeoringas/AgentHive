@@ -1,120 +1,95 @@
 import React, { useState } from 'react';
 import { Task, TaskStatus } from '@agenthive/shared';
 import HexCell from './HexCell';
+import HoneyFill from './HoneyFill';
 import { hexPath, hexWidth, hexHeight, HEX_SIZE } from '../utils/hex';
 import type { HexCoord } from '../utils/hex';
-import { useDrag } from '../hooks/useDrag';
+import styles from './TaskCell.module.css';
 
 interface TaskCellProps {
   task: Task;
   onClick: (task: Task) => void;
-  onDragEnd?: (taskId: string, coord: HexCoord) => void;
   onHover?: (taskId: string | null) => void;
 }
 
 const statusColors: Record<TaskStatus, string> = {
-  waiting: '#9ca3af',
-  running: '#f59e0b',
-  paused: '#f59e0b',
-  reviewing: '#8b5cf6',
-  completed: '#10b981',
-  needs_intervention: '#ef4444',
-  interrupted: '#6b7280',
-  conflict_resolving: '#f59e0b',
+  waiting: 'var(--status-waiting)',
+  running: 'var(--status-running)',
+  paused: 'var(--status-paused)',
+  reviewing: 'var(--status-reviewing)',
+  completed: 'var(--status-completed)',
+  needs_intervention: 'var(--status-intervention)',
+  interrupted: 'var(--status-interrupted)',
+  conflict_resolving: 'var(--status-conflict)',
 };
+
+function getProgress(status: TaskStatus): number {
+  switch (status) {
+    case 'waiting': return 0;
+    case 'running': return 40;
+    case 'needs_intervention': return 40;
+    case 'conflict_resolving': return 40;
+    case 'reviewing': return 90;
+    case 'completed': return 100;
+    case 'paused': return 30;
+    case 'interrupted': return 30;
+  }
+}
 
 const w = hexWidth();
 const h = hexHeight();
 const path = hexPath(HEX_SIZE);
 
-export default function TaskCell({ task, onClick, onDragEnd, onHover }: TaskCellProps) {
+export default function TaskCell({ task, onClick, onHover }: TaskCellProps) {
   const [hovered, setHovered] = useState(false);
-  const col = task.canvas_col ?? 0;
-  const row = task.canvas_row ?? 2;
-  const color = statusColors[task.status];
+  const q = task.canvas_q ?? 0;
+  const r = task.canvas_r ?? 2;
+  const coord: HexCoord = { q, r };
   const isIntervention = task.status === 'needs_intervention';
+  const isInterrupted = task.status === 'interrupted';
+  const isRunning = task.status === 'running';
 
-  const { isDragging, dragOffset, handleMouseDown } = useDrag({
-    currentCoord: { col, row },
-    onDragEnd: (coord) => onDragEnd?.(task.id, coord),
-  });
+  const cellStyle: React.CSSProperties = {
+    transform: hovered ? 'scale(1.06)' : 'scale(1)',
+    transition: `transform var(--duration-fast) var(--ease-default)`,
+    zIndex: hovered ? 10 : 1,
+  };
+
+  const innerClasses = [
+    styles.inner,
+    isIntervention ? styles.intervention : '',
+    isInterrupted ? styles.interrupted : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <HexCell
-      col={col}
-      row={row}
-      onClick={() => { if (!isDragging) onClick(task); }}
-      style={{
-        transform: isDragging && dragOffset
-          ? `translate(${dragOffset.x}px, ${dragOffset.y}px)`
-          : hovered ? 'scale(1.05)' : 'scale(1)',
-        transition: isDragging ? 'none' : 'transform 0.15s ease',
-        zIndex: isDragging ? 100 : hovered ? 10 : 1,
-        opacity: isDragging ? 0.8 : 1,
-      }}
+      coord={coord}
+      onClick={() => onClick(task)}
+      style={cellStyle}
     >
       <div
-        onMouseDown={handleMouseDown}
+        className={innerClasses}
         onMouseEnter={() => { setHovered(true); onHover?.(task.id); }}
         onMouseLeave={() => { setHovered(false); onHover?.(null); }}
-        style={{ position: 'relative', width: w, height: h }}
       >
+        <HoneyFill progress={getProgress(task.status)} status={task.status} />
         <svg
-          width={w}
-          height={h}
-          viewBox={`${-w / 2 - 2} ${-h / 2 - 2} ${w + 4} ${h + 4}`}
-          style={{ position: 'absolute', top: -2, left: -2, width: w + 4, height: h + 4 }}
+          className={styles.svg}
+          viewBox={`${-w / 2} ${-h / 2} ${w} ${h}`}
           overflow="visible"
         >
           <path
             d={path}
-            fill="rgba(255,255,255,0.8)"
-            stroke={color}
-            strokeWidth={isIntervention ? 3 : 2}
+            className={styles.hexBorder}
+            style={{ '--border-color': statusColors[task.status] } as React.CSSProperties}
+            fill="none"
           />
         </svg>
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: w,
-            height: h,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 10px',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: '#1f2937',
-              textAlign: 'center',
-              overflow: 'hidden',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              lineHeight: '1.3',
-              maxWidth: '100%',
-            }}
-          >
-            {task.name}
-          </div>
-          {task.current_phase && (
-            <div
-              style={{
-                fontSize: 10,
-                color: '#9ca3af',
-                marginTop: 2,
-                textAlign: 'center',
-              }}
-            >
-              {task.current_phase}
-            </div>
+        {isInterrupted && <div className={styles.interruptedOverlay} />}
+        <div className={styles.content}>
+          <div className={styles.taskName}>{task.name}</div>
+          {isRunning && task.current_phase && (
+            <div className={styles.phase}>{task.current_phase}</div>
           )}
         </div>
       </div>

@@ -1,5 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { hexPath } from "../utils/hex";
+import styles from "./Login.module.css";
+
+const LOGO_SIZE = 84;
 
 export function Login() {
   const navigate = useNavigate();
@@ -37,16 +41,27 @@ export function Login() {
 
   return (
     <div className="center-container">
-      <div className="glass-card" style={{ width: 380, padding: 40 }}>
-        <h1 style={{ textAlign: "center", fontSize: 28, marginBottom: 8, color: "#1e1b4b" }}>
-          AgentHive
-        </h1>
-        <p style={{ textAlign: "center", fontSize: 14, color: "#6b7280", marginBottom: 32 }}>
-          蜂巢协作空间
-        </p>
+      <div className={`glass-card ${styles.card}`}>
+        <svg
+          className={styles.logo}
+          width={LOGO_SIZE * Math.sqrt(3)}
+          height={LOGO_SIZE * 2}
+          viewBox={`${-LOGO_SIZE * Math.sqrt(3) / 2} ${-LOGO_SIZE} ${LOGO_SIZE * Math.sqrt(3)} ${LOGO_SIZE * 2}`}
+        >
+          <defs>
+            <radialGradient id="logoGrad">
+              <stop offset="0%" stopColor="var(--honey-500)" />
+              <stop offset="100%" stopColor="var(--honey-700)" />
+            </radialGradient>
+          </defs>
+          <path d={hexPath(LOGO_SIZE)} fill="url(#logoGrad)" />
+        </svg>
+
+        <h1 className={styles.title}>AgentHive</h1>
+        <p className={styles.subtitle}>蜂巢协作空间</p>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 16 }}>
+          <div className={styles.field}>
             <input
               type="text"
               placeholder="用户名"
@@ -55,7 +70,7 @@ export function Login() {
               required
             />
           </div>
-          <div style={{ marginBottom: 24 }}>
+          <div className={styles.fieldLast}>
             <input
               type="password"
               placeholder="密码"
@@ -65,11 +80,7 @@ export function Login() {
             />
           </div>
 
-          {error && (
-            <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 16, textAlign: "center" }}>
-              {error}
-            </p>
-          )}
+          {error && <p className={styles.error}>{error}</p>}
 
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? "登录中..." : "登录"}

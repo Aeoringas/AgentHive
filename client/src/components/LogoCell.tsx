@@ -1,59 +1,40 @@
 import React from 'react';
 import HexCell from './HexCell';
 import { hexPath, hexWidth, hexHeight, HEX_SIZE } from '../utils/hex';
+import styles from './LogoCell.module.css';
 
+const logoSize = HEX_SIZE * 1.3;
 const w = hexWidth();
 const h = hexHeight();
-const path = hexPath(HEX_SIZE);
-
-const pulseKeyframes = `
-@keyframes logoPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
-`;
+const logoW = Math.sqrt(3) * logoSize;
+const logoH = 2 * logoSize;
+const path = hexPath(logoSize);
 
 export default function LogoCell() {
   return (
-    <>
-      <style>{pulseKeyframes}</style>
-      <HexCell col={0} row={0}>
-        <div style={{ position: 'relative', width: w, height: h, animation: 'logoPulse 3s ease-in-out infinite' }}>
-          <svg
-            width={w}
-            height={h}
-            viewBox={`${-w / 2 - 2} ${-h / 2 - 2} ${w + 4} ${h + 4}`}
-            style={{ position: 'absolute', top: -2, left: -2, width: w + 4, height: h + 4 }}
-            overflow="visible"
-          >
-            <defs>
-              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#4f46e5" />
-                <stop offset="100%" stopColor="#7c3aed" />
-              </linearGradient>
-            </defs>
-            <path d={path} fill="url(#logoGradient)" />
-          </svg>
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: w,
-              height: h,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontSize: 20,
-              fontWeight: 700,
-              userSelect: 'none',
-            }}
-          >
-            AH
-          </div>
-        </div>
-      </HexCell>
-    </>
+    <HexCell
+      coord={{ q: 0, r: 0 }}
+      style={{
+        '--hex-width': logoW + 'px',
+        '--hex-height': logoH + 'px',
+      } as React.CSSProperties}
+    >
+      <div className={styles.wrapper}>
+        <svg
+          className={styles.svg}
+          viewBox={`${-logoW / 2} ${-logoH / 2} ${logoW} ${logoH}`}
+          overflow="visible"
+        >
+          <defs>
+            <radialGradient id="logoRadial" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="var(--honey-500)" />
+              <stop offset="100%" stopColor="var(--honey-700)" />
+            </radialGradient>
+          </defs>
+          <path d={path} fill="url(#logoRadial)" />
+        </svg>
+        <div className={styles.label}>AH</div>
+      </div>
+    </HexCell>
   );
 }

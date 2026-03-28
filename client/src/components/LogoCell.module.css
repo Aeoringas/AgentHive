@@ -1,0 +1,30 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(var(--shadow-glow));
+}
+
+.label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-inverse);
+  user-select: none;
+}

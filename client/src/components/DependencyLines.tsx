@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { hexToPixel } from "../utils/hex";
 import type { Task } from "@agenthive/shared";
+import styles from './DependencyLines.module.css';
 
 interface DependencyLinesProps {
   tasks: Task[];
@@ -32,16 +33,16 @@ export default function DependencyLines({
 
     const result: Line[] = [];
     for (const task of tasks) {
-      if (task.canvas_col == null || task.canvas_row == null) continue;
-      const end = hexToPixel({ col: task.canvas_col, row: task.canvas_row });
+      if (task.canvas_q == null || task.canvas_r == null) continue;
+      const end = hexToPixel({ q: task.canvas_q, r: task.canvas_r });
 
       for (const depId of task.dependencies) {
         const upstream = taskMap.get(depId);
-        if (!upstream || upstream.canvas_col == null || upstream.canvas_row == null)
+        if (!upstream || upstream.canvas_q == null || upstream.canvas_r == null)
           continue;
         const start = hexToPixel({
-          col: upstream.canvas_col,
-          row: upstream.canvas_row,
+          q: upstream.canvas_q,
+          r: upstream.canvas_r,
         });
         result.push({
           id: `${depId}->${task.id}`,
@@ -65,40 +66,29 @@ export default function DependencyLines({
     (line.fromId === hoveredTaskId || line.toId === hoveredTaskId);
 
   return (
-    <svg
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        overflow: "visible",
-        zIndex: 0,
-      }}
-    >
+    <svg className={styles.svg}>
       <defs>
         <marker
-          id="dep-arrow-green"
+          id="dep-arrow-completed"
           viewBox="0 0 10 10"
           refX="10"
           refY="5"
-          markerWidth="8"
-          markerHeight="8"
+          markerWidth="6"
+          markerHeight="6"
           orient="auto-start-reverse"
         >
-          <path d="M0,0 L10,5 L0,10 Z" fill="#10b981" />
+          <path d="M0,0 L10,5 L0,10 Z" fill="var(--status-completed)" />
         </marker>
         <marker
-          id="dep-arrow-gray"
+          id="dep-arrow-pending"
           viewBox="0 0 10 10"
           refX="10"
           refY="5"
-          markerWidth="8"
-          markerHeight="8"
+          markerWidth="6"
+          markerHeight="6"
           orient="auto-start-reverse"
         >
-          <path d="M0,0 L10,5 L0,10 Z" fill="#d1d5db" />
+          <path d="M0,0 L10,5 L0,10 Z" fill="var(--wax-dark)" />
         </marker>
       </defs>
       {lines.map((line) => {
@@ -108,26 +98,23 @@ export default function DependencyLines({
         const cx2 = line.ex - dx;
         const cy2 = line.ey;
         const d = `M${line.sx},${line.sy} C${cx1},${cy1} ${cx2},${cy2} ${line.ex},${line.ey}`;
-        const color = line.completed ? "#10b981" : "#d1d5db";
         const marker = line.completed
-          ? "url(#dep-arrow-green)"
-          : "url(#dep-arrow-gray)";
+          ? "url(#dep-arrow-completed)"
+          : "url(#dep-arrow-pending)";
 
-        let opacity = 1;
+        let opacityClass = '';
         if (hoveredTaskId != null) {
-          opacity = relatedToHover(line) ? 1 : 0.15;
+          opacityClass = relatedToHover(line) ? styles.highlighted : styles.dimmed;
         }
+
+        const lineClass = line.completed ? styles.lineCompleted : styles.linePending;
 
         return (
           <path
             key={line.id}
             d={d}
-            fill="none"
-            stroke={color}
-            strokeWidth={2}
-            strokeDasharray={line.completed ? undefined : "6 4"}
+            className={`${lineClass}${opacityClass ? ` ${opacityClass}` : ''}`}
             markerEnd={marker}
-            opacity={opacity}
           />
         );
       })}

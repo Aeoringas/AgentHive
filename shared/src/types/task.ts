@@ -25,8 +25,8 @@ export interface Task {
   worktree_branch: string | null;
   current_phase: string | null;
   token_total: number;
-  canvas_col: number | null;
-  canvas_row: number | null;
+  canvas_q: number | null;
+  canvas_r: number | null;
   created_at: string;
   updated_at: string;
 }

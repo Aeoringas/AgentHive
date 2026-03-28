@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { CanvasContext } from "./HexCanvas";
 import { hexToPixel, pixelToHex, hexPath, hexWidth, hexHeight } from "../utils/hex";
+import styles from './HexGrid.module.css';
 
 interface HexGridProps {
   visible: boolean;
@@ -23,41 +24,38 @@ export default function HexGrid({ visible }: HexGridProps) {
   const right = (vw - panX) / zoom + w;
   const bottom = (vh - panY) / zoom + h;
 
-  const topLeft = pixelToHex({ x: left, y: top });
-  const bottomRight = pixelToHex({ x: right, y: bottom });
+  const corners = [
+    pixelToHex({ x: left, y: top }),
+    pixelToHex({ x: right, y: top }),
+    pixelToHex({ x: left, y: bottom }),
+    pixelToHex({ x: right, y: bottom }),
+  ];
 
-  const minCol = topLeft.col - 1;
-  const maxCol = bottomRight.col + 1;
-  const minRow = topLeft.row - 1;
-  const maxRow = bottomRight.row + 1;
+  let minQ = Infinity, maxQ = -Infinity, minR = Infinity, maxR = -Infinity;
+  for (const c of corners) {
+    if (c.q < minQ) minQ = c.q;
+    if (c.q > maxQ) maxQ = c.q;
+    if (c.r < minR) minR = c.r;
+    if (c.r > maxR) maxR = c.r;
+  }
+  minQ -= 1; maxQ += 1; minR -= 1; maxR += 1;
 
   const cells: { key: string; x: number; y: number }[] = [];
-  for (let row = minRow; row <= maxRow; row++) {
-    for (let col = minCol; col <= maxCol; col++) {
-      const center = hexToPixel({ col, row });
-      cells.push({ key: `${col},${row}`, x: center.x, y: center.y });
+  for (let r = minR; r <= maxR; r++) {
+    for (let q = minQ; q <= maxQ; q++) {
+      const center = hexToPixel({ q, r });
+      cells.push({ key: `${q},${r}`, x: center.x, y: center.y });
     }
   }
 
   return (
-    <svg
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        overflow: "visible",
-        pointerEvents: "none",
-      }}
-    >
+    <svg className={styles.grid}>
       {cells.map((cell) => (
         <path
           key={cell.key}
           d={path}
           transform={`translate(${cell.x},${cell.y})`}
-          stroke="#e5e7eb"
-          strokeWidth={1}
-          fill="none"
-          opacity={0.5}
+          className={styles.cell}
         />
       ))}
     </svg>

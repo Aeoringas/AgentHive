@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
+import styles from './HexCanvas.module.css';
 
 export interface CanvasState {
   panX: number;
@@ -157,17 +158,19 @@ const HexCanvas = forwardRef<HexCanvasHandle, HexCanvasProps>(
       onStateChange?.({ panX, panY, zoom });
     }, [panX, panY, zoom, onStateChange]);
 
+    const containerClass = `${styles.container}${dragging ? ` ${styles.dragging}` : ''}`;
+
+    const innerStyle = {
+      '--pan-x': `${panX}px`,
+      '--pan-y': `${panY}px`,
+      '--zoom': zoom,
+    } as React.CSSProperties;
+
     return (
       <CanvasContext.Provider value={{ panX, panY, zoom }}>
         <div
           ref={containerRef}
-          style={{
-            width: "100%",
-            height: "calc(100vh - 48px)",
-            overflow: "hidden",
-            position: "relative",
-            cursor: dragging ? "grabbing" : "default",
-          }}
+          className={containerClass}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -175,12 +178,8 @@ const HexCanvas = forwardRef<HexCanvasHandle, HexCanvasProps>(
         >
           <div
             ref={innerRef}
-            style={{
-              transformOrigin: "0 0",
-              transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
-              width: "100%",
-              height: "100%",
-            }}
+            className={styles.inner}
+            style={innerStyle}
           >
             {children}
           </div>

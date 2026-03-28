@@ -1,0 +1,53 @@
+.inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.hexDefault {
+  fill: var(--bg-subtle);
+  stroke: var(--wax);
+  stroke-width: 2;
+  transition: fill var(--duration-fast) var(--ease-default),
+              stroke var(--duration-fast) var(--ease-default);
+}
+
+.inner:hover .hexDefault {
+  fill: var(--honey-100);
+  stroke: var(--honey-400);
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+}
+
+.cellHover {
+  transform: scale(1.06);
+  box-shadow: var(--shadow-md);
+}
+
+.cellDragging {
+  transition: none !important;
+}

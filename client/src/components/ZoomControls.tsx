@@ -1,4 +1,4 @@
-import React from 'react';
+import styles from './ZoomControls.module.css';
 
 interface ZoomControlsProps {
   zoom: number;
@@ -8,61 +8,32 @@ interface ZoomControlsProps {
   onFitAll: () => void;
 }
 
-const btnStyle: React.CSSProperties = {
-  width: 36,
-  height: 28,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  border: 'none',
-  background: 'transparent',
-  color: '#374151',
-  fontSize: 14,
-  fontWeight: 500,
-  cursor: 'pointer',
-};
-
 export default function ZoomControls({ zoom, onZoomIn, onZoomOut, onZoomReset, onFitAll }: ZoomControlsProps) {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        right: 20,
-        bottom: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        background: 'rgba(255,255,255,0.72)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderRadius: 12,
-        border: '1px solid rgba(0,0,0,0.08)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-        overflow: 'hidden',
-      }}
-    >
-      <button title="放大" onClick={onZoomIn} style={btnStyle}>+</button>
-      <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', width: '80%' }} />
-      <div
-        style={{
-          width: 36,
-          height: 24,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 11,
-          color: '#6b7280',
-          userSelect: 'none',
-        }}
-      >
+    <div className={styles.container}>
+      <button className={styles.btn} onClick={onZoomIn} title="放大">+</button>
+      <div className={styles.zoomLabel}>
         {Math.round(zoom * 100)}%
       </div>
-      <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', width: '80%' }} />
-      <button title="缩小" onClick={onZoomOut} style={btnStyle}>-</button>
-      <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', width: '80%' }} />
-      <button title="重置缩放" onClick={onZoomReset} style={{ ...btnStyle, fontSize: 11 }}>1:1</button>
-      <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', width: '80%' }} />
-      <button title="适应全部" onClick={onFitAll} style={{ ...btnStyle, fontSize: 12 }}>全</button>
+      <button className={styles.btn} onClick={onZoomOut} title="缩小">-</button>
+      <button className={styles.btn} onClick={onZoomReset} title="归位">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2" />
+          <circle cx="7" cy="7" r="1.5" fill="currentColor" />
+          <line x1="7" y1="0" x2="7" y2="3" stroke="currentColor" strokeWidth="1.2" />
+          <line x1="7" y1="11" x2="7" y2="14" stroke="currentColor" strokeWidth="1.2" />
+          <line x1="0" y1="7" x2="3" y2="7" stroke="currentColor" strokeWidth="1.2" />
+          <line x1="11" y1="7" x2="14" y2="7" stroke="currentColor" strokeWidth="1.2" />
+        </svg>
+      </button>
+      <button className={styles.btn} onClick={onFitAll} title="适应全部">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <polyline points="1,4.5 1,1 4.5,1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="9.5,1 13,1 13,4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="13,9.5 13,13 9.5,13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="4.5,13 1,13 1,9.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
     </div>
   );
 }

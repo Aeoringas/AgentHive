@@ -18,7 +18,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
 });
 
 router.post('/', (req: AuthRequest, res: Response) => {
-  const { project_id, name, description, type, status, dependencies, sort_order, canvas_col, canvas_row } = req.body;
+  const { project_id, name, description, type, status, dependencies, sort_order, canvas_q, canvas_r } = req.body;
   if (!project_id || !name || !type) {
     res.status(400).json({ error: 'project_id, name, and type required' });
     return;
@@ -26,13 +26,13 @@ router.post('/', (req: AuthRequest, res: Response) => {
 
   const id = uuidv4();
   db.prepare(
-    `INSERT INTO tasks (id, project_id, name, description, type, status, dependencies, sort_order, canvas_col, canvas_row)
+    `INSERT INTO tasks (id, project_id, name, description, type, status, dependencies, sort_order, canvas_q, canvas_r)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id, project_id, name, description || '', type,
     status || 'waiting',
     dependencies ? JSON.stringify(dependencies) : '[]',
-    sort_order || 0, canvas_col ?? null, canvas_row ?? null
+    sort_order || 0, canvas_q ?? null, canvas_r ?? null
   );
 
   const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
@@ -49,7 +49,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 
   const fields = ['name', 'description', 'type', 'status', 'interrupted_status', 'sort_order',
     'requirement_doc', 'technical_plan', 'worktree_branch', 'current_phase',
-    'token_total', 'canvas_col', 'canvas_row'];
+    'token_total', 'canvas_q', 'canvas_r'];
 
   const updates: string[] = [];
   const values: any[] = [];

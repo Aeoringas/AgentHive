@@ -1,0 +1,91 @@
+.card {
+  width: 480px;
+  padding: var(--space-10);
+}
+
+.logo {
+  display: block;
+  margin: 0 auto var(--space-2);
+}
+
+.title {
+  text-align: center;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: var(--space-8);
+}
+
+.stepHex {
+  flex-shrink: 0;
+}
+
+.stepLine {
+  width: 24px;
+  height: 2px;
+  background: var(--wax);
+  flex-shrink: 0;
+}
+
+.error {
+  color: var(--status-intervention);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+  text-align: center;
+}
+
+.stepTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-5);
+}
+
+.field {
+  margin-bottom: var(--space-4);
+}
+
+.fieldLast {
+  margin-bottom: var(--space-6);
+}
+
+.checkContent {
+  text-align: center;
+  padding: var(--space-5);
+}
+
+.checkText {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+.checkRunning {
+  color: var(--status-running);
+}
+
+.checkPassed {
+  color: var(--status-completed);
+}
+
+.checkFailed {
+  color: var(--status-intervention);
+}
+
+.completeContent {
+  text-align: center;
+  padding: var(--space-5);
+}
+
+.completeText {
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  margin-bottom: var(--space-6);
+}

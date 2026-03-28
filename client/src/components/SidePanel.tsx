@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Task, TaskStatus } from '@agenthive/shared';
+import styles from './SidePanel.module.css';
 
 interface SidePanelProps {
   task: Task | null;
@@ -7,18 +8,18 @@ interface SidePanelProps {
 }
 
 const statusColors: Record<TaskStatus, string> = {
-  waiting: '#9ca3af',
-  running: '#f59e0b',
-  paused: '#f59e0b',
-  reviewing: '#8b5cf6',
-  completed: '#10b981',
-  needs_intervention: '#ef4444',
-  interrupted: '#6b7280',
-  conflict_resolving: '#f59e0b',
+  waiting: 'var(--status-waiting)',
+  running: 'var(--status-running)',
+  paused: 'var(--status-paused)',
+  reviewing: 'var(--status-reviewing)',
+  completed: 'var(--status-completed)',
+  needs_intervention: 'var(--status-intervention)',
+  interrupted: 'var(--status-interrupted)',
+  conflict_resolving: 'var(--status-conflict)',
 };
 
 const statusLabels: Record<TaskStatus, string> = {
-  waiting: '等待中',
+  waiting: '待执行',
   running: '运行中',
   paused: '已暂停',
   reviewing: '审查中',
@@ -45,15 +46,8 @@ const tabs: { key: TabKey; label: string }[] = [
 function StatusBadge({ status }: { status: TaskStatus }) {
   return (
     <span
-      style={{
-        display: 'inline-block',
-        padding: '2px 8px',
-        borderRadius: 4,
-        fontSize: 12,
-        fontWeight: 500,
-        color: '#fff',
-        backgroundColor: statusColors[status],
-      }}
+      className={styles.statusBadge}
+      style={{ backgroundColor: statusColors[status] }}
     >
       {statusLabels[status]}
     </span>
@@ -61,23 +55,6 @@ function StatusBadge({ status }: { status: TaskStatus }) {
 }
 
 function ActionButtons({ status }: { status: TaskStatus }) {
-  const btn = (label: string) => (
-    <button
-      key={label}
-      onClick={() => {}}
-      style={{
-        padding: '6px 16px',
-        borderRadius: 6,
-        border: '1px solid rgba(0,0,0,0.1)',
-        background: '#fff',
-        fontSize: 13,
-        cursor: 'pointer',
-      }}
-    >
-      {label}
-    </button>
-  );
-
   const map: Partial<Record<TaskStatus, string[]>> = {
     waiting: ['执行'],
     running: ['暂停', '终止'],
@@ -91,8 +68,12 @@ function ActionButtons({ status }: { status: TaskStatus }) {
   if (!labels) return null;
 
   return (
-    <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-      {labels.map(btn)}
+    <div className={styles.actionButtons}>
+      {labels.map((label) => (
+        <button key={label} className={styles.actionBtn} onClick={() => {}}>
+          {label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -102,42 +83,15 @@ function CollapsibleSection({ title, content }: { title: string; content: string
   if (!content) return null;
 
   return (
-    <div style={{ marginTop: 12 }}>
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: 13,
-          fontWeight: 600,
-          color: '#374151',
-          padding: 0,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-        }}
-      >
-        <span style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', display: 'inline-block' }}>
+    <div>
+      <button className={styles.collapsibleToggle} onClick={() => setOpen(!open)}>
+        <span className={`${styles.collapsibleArrow}${open ? ` ${styles.collapsibleArrowOpen}` : ''}`}>
           ▶
         </span>
         {title}
       </button>
       {open && (
-        <pre
-          style={{
-            marginTop: 8,
-            padding: 12,
-            background: 'rgba(0,0,0,0.03)',
-            borderRadius: 8,
-            fontSize: 12,
-            lineHeight: 1.5,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            overflow: 'auto',
-            maxHeight: 300,
-          }}
-        >
+        <pre className={styles.collapsibleContent}>
           {content}
         </pre>
       )}
@@ -147,36 +101,17 @@ function CollapsibleSection({ title, content }: { title: string; content: string
 
 function ConversationTab() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 14 }}>
+    <div className={styles.conversationWrap}>
+      <div className={styles.conversationEmpty}>
         对话功能开发中
       </div>
-      <div style={{ padding: 12, borderTop: '1px solid rgba(0,0,0,0.06)', display: 'flex', gap: 8 }}>
+      <div className={styles.conversationInput}>
         <input
           disabled
           placeholder="输入消息..."
-          style={{
-            flex: 1,
-            padding: '8px 12px',
-            borderRadius: 8,
-            border: '1px solid rgba(0,0,0,0.1)',
-            fontSize: 13,
-            background: '#f9fafb',
-            outline: 'none',
-          }}
+          className={styles.inputField}
         />
-        <button
-          disabled
-          style={{
-            padding: '8px 16px',
-            borderRadius: 8,
-            border: 'none',
-            background: '#d1d5db',
-            color: '#fff',
-            fontSize: 13,
-            cursor: 'not-allowed',
-          }}
-        >
+        <button disabled className={styles.sendBtn}>
           发送
         </button>
       </div>
@@ -186,7 +121,7 @@ function ConversationTab() {
 
 function FilesTab() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af', fontSize: 14 }}>
+    <div className={styles.filesEmpty}>
       文件变更列表 - 开发中
     </div>
   );
@@ -194,24 +129,24 @@ function FilesTab() {
 
 function DetailsTab({ task }: { task: Task }) {
   return (
-    <div style={{ padding: 16, overflow: 'auto', height: '100%', boxSizing: 'border-box' }}>
-      <div style={{ background: 'rgba(0,0,0,0.02)', borderRadius: 10, padding: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 13 }}>
+    <div className={styles.detailsWrap}>
+      <div className={styles.infoCard}>
+        <div className={styles.infoGrid}>
           <div>
-            <div style={{ color: '#9ca3af', marginBottom: 4 }}>状态</div>
+            <div className={styles.infoLabel}>状态</div>
             <StatusBadge status={task.status} />
           </div>
           <div>
-            <div style={{ color: '#9ca3af', marginBottom: 4 }}>类型</div>
-            <div style={{ fontWeight: 500 }}>{typeLabels[task.type] ?? task.type}</div>
+            <div className={styles.infoLabel}>类型</div>
+            <div className={styles.infoValue}>{typeLabels[task.type] ?? task.type}</div>
           </div>
           <div>
-            <div style={{ color: '#9ca3af', marginBottom: 4 }}>创建时间</div>
-            <div>{new Date(task.created_at).toLocaleString('zh-CN')}</div>
+            <div className={styles.infoLabel}>创建时间</div>
+            <div className={styles.infoValue}>{new Date(task.created_at).toLocaleString('zh-CN')}</div>
           </div>
           <div>
-            <div style={{ color: '#9ca3af', marginBottom: 4 }}>Token 用量</div>
-            <div style={{ fontWeight: 500 }}>{task.token_total.toLocaleString()}</div>
+            <div className={styles.infoLabel}>Token 用量</div>
+            <div className={styles.infoValue}>{task.token_total.toLocaleString()}</div>
           </div>
         </div>
       </div>
@@ -229,88 +164,32 @@ export default function SidePanel({ task, onClose }: SidePanelProps) {
   const visible = task !== null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        right: 0,
-        top: 48,
-        height: 'calc(100vh - 48px)',
-        width: 480,
-        transform: visible ? 'translateX(0)' : 'translateX(100%)',
-        transition: 'transform 0.3s ease',
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderLeft: '1px solid rgba(0,0,0,0.06)',
-        zIndex: 50,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <div className={`${styles.panel} ${visible ? styles.panelVisible : styles.panelHidden}`}>
       {task && (
         <>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 16px',
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
-              flexShrink: 0,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-              <span style={{ fontWeight: 700, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {task.name}
-              </span>
+          <div className={styles.header}>
+            <div className={styles.headerLeft}>
+              <span className={styles.taskTitle}>{task.name}</span>
               <StatusBadge status={task.status} />
             </div>
-            <button
-              onClick={onClose}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 18,
-                color: '#6b7280',
-                padding: '4px 8px',
-                borderRadius: 4,
-                flexShrink: 0,
-              }}
-            >
+            <button className={styles.closeBtn} onClick={onClose}>
               X
             </button>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
-              flexShrink: 0,
-            }}
-          >
+          <div className={styles.tabBar}>
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                style={{
-                  flex: 1,
-                  padding: '10px 0',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: activeTab === tab.key ? '2px solid #4f46e5' : '2px solid transparent',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: activeTab === tab.key ? 600 : 400,
-                  color: activeTab === tab.key ? '#4f46e5' : '#6b7280',
-                }}
+                className={`${styles.tab}${activeTab === tab.key ? ` ${styles.tabActive}` : ''}`}
               >
                 {tab.label}
               </button>
             ))}
           </div>
 
-          <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <div className={styles.tabContent}>
             {activeTab === 'conversation' && <ConversationTab />}
             {activeTab === 'files' && <FilesTab />}
             {activeTab === 'details' && <DetailsTab task={task} />}

@@ -1,0 +1,13 @@
+.grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.cell {
+  fill: none;
+  stroke: var(--wax-light);
+  stroke-width: 1;
+}

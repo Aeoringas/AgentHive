@@ -1,0 +1,31 @@
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+
+.lineCompleted {
+  fill: none;
+  stroke: var(--status-completed);
+  stroke-width: 2;
+}
+
+.linePending {
+  fill: none;
+  stroke: var(--wax-dark);
+  stroke-width: 1;
+  stroke-dasharray: 6 4;
+}
+
+.highlighted {
+  opacity: 1;
+}
+
+.dimmed {
+  opacity: 0.15;
+}

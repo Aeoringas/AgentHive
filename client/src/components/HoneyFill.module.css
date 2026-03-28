@@ -1,0 +1,38 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: var(--fill-height, 0%);
+  background: linear-gradient(to top, var(--honey-600), var(--honey-400));
+  transition: height var(--duration-slow) var(--ease-default);
+}
+
+.fill::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -10%;
+  width: 120%;
+  height: 3px;
+  background: var(--honey-300);
+  opacity: 0.3;
+  animation: honeyWave 3s ease-in-out infinite;
+}
+
+.seal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--wax-dark);
+}

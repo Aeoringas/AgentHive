@@ -1,49 +1,33 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Task } from "@agenthive/shared";
+import { Task, TaskStatus } from "@agenthive/shared";
 import HexCanvas, { type HexCanvasHandle } from "../components/HexCanvas";
 import HexGrid from "../components/HexGrid";
 import LogoCell from "../components/LogoCell";
 import FunctionCell from "../components/FunctionCell";
 import TaskCell from "../components/TaskCell";
-import ColumnHeaders from "../components/ColumnHeaders";
 import DependencyLines from "../components/DependencyLines";
 import SidePanel from "../components/SidePanel";
 import Toolbar from "../components/Toolbar";
 import ZoomControls from "../components/ZoomControls";
 import StatusLegend from "../components/StatusLegend";
-import { hexHeight, hexWidth, hexToPixel } from "../utils/hex";
+import TopBar from "../components/TopBar";
+import ArchiveBar from "../components/ArchiveBar";
+import { hexHeight, hexWidth, hexToPixel, ringCoords } from "../utils/hex";
 import type { HexCoord } from "../utils/hex";
 
-const STATUS_COLUMNS: Record<string, number> = {
-  waiting: -1,
-  running: 0,
-  paused: 0,
-  conflict_resolving: 0,
-  needs_intervention: 0,
-  interrupted: 0,
-  reviewing: 1,
-  completed: 2,
-};
-
-const COLUMN_DEFS = [
-  { col: -2, label: "待办", color: "#9ca3af" },
-  { col: -1, label: "任务", color: "#f59e0b" },
-  { col: 0, label: "运行中", color: "#eab308" },
-  { col: 1, label: "审查", color: "#8b5cf6" },
-  { col: 2, label: "完成", color: "#10b981" },
+const FUNCTION_DEFS: { q: number; r: number; label: string }[] = [
+  { q: 1, r: 0, label: "对话" },
+  { q: 0, r: 1, label: "文件" },
+  { q: -1, r: 1, label: "Skill" },
+  { q: -1, r: 0, label: "设置" },
+  { q: 0, r: -1, label: "提交" },
+  { q: 1, r: -1, label: "用量" },
 ];
 
-const FUNC_COLOR = "#6366f1";
-
-const FUNCTION_DEFS = [
-  { col: -3, row: 0, label: "设置" },
-  { col: -2, row: 0, label: "Skill" },
-  { col: -1, row: 0, label: "对话" },
-  { col: 1, row: 0, label: "文件" },
-  { col: 2, row: 0, label: "提交" },
-  { col: 3, row: 0, label: "用量" },
-];
+const RING_2_STATUSES: TaskStatus[] = ['running', 'needs_intervention', 'conflict_resolving', 'paused'];
+const RING_3_STATUSES: TaskStatus[] = ['reviewing'];
+const RING_4_STATUSES: TaskStatus[] = ['waiting'];
 
 function getAuthHeaders() {
   const token = localStorage.getItem("token");
@@ -53,15 +37,72 @@ function getAuthHeaders() {
   };
 }
 
-function assignCanvasPositions(tasks: Task[]): Task[] {
-  const columnRows: Record<number, number> = {};
-  return tasks.map((task) => {
-    if (task.canvas_col != null && task.canvas_row != null) return task;
-    const col = STATUS_COLUMNS[task.status] ?? -1;
-    const row = (columnRows[col] ?? 1) + 1;
-    columnRows[col] = row;
-    return { ...task, canvas_col: col, canvas_row: row };
+function assignRingPositions(tasks: Task[]): Task[] {
+  const manuallyPositioned = new Set<string>();
+  const result = tasks.map(t => {
+    if (t.canvas_q != null && t.canvas_r != null) {
+      manuallyPositioned.add(`${t.canvas_q},${t.canvas_r}`);
+    }
+    return { ...t };
   });
+
+  const ring2Coords = ringCoords(2);
+  const ring3Coords = ringCoords(3);
+  const ring4Coords = ringCoords(4);
+
+  function nextAvailable(coords: HexCoord[], idx: { value: number }): HexCoord | null {
+    while (idx.value < coords.length) {
+      const c = coords[idx.value];
+      const key = `${c.q},${c.r}`;
+      idx.value++;
+      if (!manuallyPositioned.has(key)) {
+        manuallyPositioned.add(key);
+        return c;
+      }
+    }
+    return null;
+  }
+
+  const r2Idx = { value: 0 };
+  const r3Idx = { value: 0 };
+  const r4Idx = { value: 0 };
+
+  for (const task of result) {
+    if (task.status === 'completed') continue;
+    if (task.status === 'interrupted') continue;
+    if (task.canvas_q != null && task.canvas_r != null) continue;
+
+    let coord: HexCoord | null = null;
+
+    if (RING_2_STATUSES.includes(task.status)) {
+      coord = nextAvailable(ring2Coords, r2Idx);
+      if (!coord) coord = nextAvailable(ring3Coords, r3Idx);
+    } else if (RING_3_STATUSES.includes(task.status)) {
+      coord = nextAvailable(ring3Coords, r3Idx);
+      if (!coord) coord = nextAvailable(ring4Coords, r4Idx);
+    } else if (RING_4_STATUSES.includes(task.status)) {
+      coord = nextAvailable(ring4Coords, r4Idx);
+    }
+
+    if (coord) {
+      task.canvas_q = coord.q;
+      task.canvas_r = coord.r;
+    }
+  }
+
+  for (const task of result) {
+    if (task.status === 'interrupted' && task.canvas_q == null) {
+      const coord = nextAvailable(ring2Coords, r2Idx)
+        ?? nextAvailable(ring3Coords, r3Idx)
+        ?? nextAvailable(ring4Coords, r4Idx);
+      if (coord) {
+        task.canvas_q = coord.q;
+        task.canvas_r = coord.r;
+      }
+    }
+  }
+
+  return result;
 }
 
 function CanvasInner({
@@ -69,53 +110,34 @@ function CanvasInner({
   gridVisible,
   depVisible,
   hoveredTaskId,
-  funcPositions,
   onTaskClick,
-  onTaskDragEnd,
   onTaskHover,
-  onFuncDragEnd,
 }: {
   tasks: Task[];
   gridVisible: boolean;
   depVisible: boolean;
   hoveredTaskId: string | null;
-  funcPositions: Record<string, HexCoord>;
   onTaskClick: (task: Task) => void;
-  onTaskDragEnd: (taskId: string, coord: HexCoord) => void;
   onTaskHover: (taskId: string | null) => void;
-  onFuncDragEnd: (label: string, coord: HexCoord) => void;
 }) {
   return (
     <>
       <HexGrid visible={gridVisible} />
       <DependencyLines tasks={tasks} visible={depVisible} hoveredTaskId={hoveredTaskId} />
       <LogoCell />
-      {FUNCTION_DEFS.map((def) => {
-        const pos = funcPositions[def.label] ?? { col: def.col, row: def.row };
-        return (
-          <FunctionCell
-            key={def.label}
-            col={pos.col}
-            row={pos.row}
-            label={def.label}
-            color={FUNC_COLOR}
-            onClick={() => {}}
-            onDragEnd={onFuncDragEnd}
-          />
-        );
-      })}
-      <ColumnHeaders
-        columns={COLUMN_DEFS.map((def) => ({
-          ...def,
-          count: tasks.filter((t) => (t.canvas_col ?? STATUS_COLUMNS[t.status] ?? -1) === def.col).length,
-        }))}
-      />
+      {FUNCTION_DEFS.map((def) => (
+        <FunctionCell
+          key={def.label}
+          coord={{ q: def.q, r: def.r }}
+          label={def.label}
+          onClick={() => {}}
+        />
+      ))}
       {tasks.map((task) => (
         <TaskCell
           key={task.id}
           task={task}
           onClick={onTaskClick}
-          onDragEnd={onTaskDragEnd}
           onHover={onTaskHover}
         />
       ))}
@@ -133,7 +155,6 @@ export function Canvas() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const [canvasState, setCanvasState] = useState({ panX: 0, panY: 0, zoom: 1 });
-  const [funcPositions, setFuncPositions] = useState<Record<string, HexCoord>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HexCanvasHandle>(null);
 
@@ -150,7 +171,7 @@ export function Canvas() {
     if (!projectId) return;
     fetch(`/api/tasks?project_id=${projectId}`, { headers: getAuthHeaders() })
       .then((res) => res.json())
-      .then((data) => setTasks(assignCanvasPositions(data)))
+      .then((data) => setTasks(assignRingPositions(data)))
       .catch(() => {});
   }, [projectId]);
 
@@ -159,70 +180,29 @@ export function Canvas() {
     navigate("/login");
   }
 
-  const handleTaskDragEnd = useCallback((taskId: string, coord: HexCoord) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, canvas_col: coord.col, canvas_row: coord.row } : t))
-    );
-  }, []);
+  const activeTasks = tasks.filter(t => t.status !== 'completed');
+  const completedTasks = tasks.filter(t => t.status === 'completed');
 
-  const handleFuncDragEnd = useCallback((label: string, coord: HexCoord) => {
-    setFuncPositions((prev) => ({ ...prev, [label]: coord }));
-  }, []);
-
-  const h = hexHeight();
   const initialPanX = (containerRef.current?.clientWidth ?? window.innerWidth) / 2;
-  const initialPanY = h * 0.75 + h / 2;
+  const initialPanY = (containerRef.current?.clientHeight ?? (window.innerHeight - 48)) / 2;
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <header
-        style={{
-          height: 48,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 20px",
-          background: "rgba(255, 255, 255, 0.7)",
-          backdropFilter: "blur(12px)",
-          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-          position: "relative",
-          zIndex: 100,
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontWeight: 700, fontSize: 16, color: "#1e1b4b" }}>AgentHive</span>
-        </div>
-        <button
-          onClick={handleLogout}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#6b7280",
-            cursor: "pointer",
-            fontSize: 14,
-            padding: "4px 12px",
-            borderRadius: 6,
-          }}
-        >
-          退出
-        </button>
-      </header>
+      <TopBar onLogout={handleLogout} />
 
       <div ref={containerRef} style={{ flex: 1, position: "relative" }}>
         <HexCanvas ref={canvasRef} onStateChange={setCanvasState} initialPanX={initialPanX} initialPanY={initialPanY}>
           <CanvasInner
-            tasks={tasks}
+            tasks={activeTasks}
             gridVisible={gridVisible}
             depVisible={depVisible}
             hoveredTaskId={hoveredTaskId}
-            funcPositions={funcPositions}
             onTaskClick={setSelectedTask}
-            onTaskDragEnd={handleTaskDragEnd}
             onTaskHover={setHoveredTaskId}
-            onFuncDragEnd={handleFuncDragEnd}
           />
         </HexCanvas>
+
+        <ArchiveBar tasks={completedTasks} onTaskClick={setSelectedTask} />
 
         <SidePanel task={selectedTask} onClose={() => setSelectedTask(null)} />
 
@@ -231,9 +211,12 @@ export function Canvas() {
         <Toolbar
           gridVisible={gridVisible}
           onToggleGrid={() => setGridVisible((v) => !v)}
+          depVisible={depVisible}
+          onToggleDep={() => setDepVisible((v) => !v)}
           autoExecute={autoExecute}
           onToggleAutoExecute={() => setAutoExecute((v) => !v)}
           onAutoArrange={() => {}}
+          onAnalyze={() => {}}
           onNewIdea={() => {}}
           onNewTask={() => {}}
           onPlan={() => {}}
@@ -245,9 +228,9 @@ export function Canvas() {
           onZoomReset={() => canvasRef.current?.zoomReset()}
           onFitAll={() => {
             const allCoords: HexCoord[] = [
-              { col: 0, row: 0 },
-              ...FUNCTION_DEFS.map((d) => funcPositions[d.label] ?? { col: d.col, row: d.row }),
-              ...tasks.map((t) => ({ col: t.canvas_col ?? 0, row: t.canvas_row ?? 2 })),
+              { q: 0, r: 0 },
+              ...FUNCTION_DEFS.map((d) => ({ q: d.q, r: d.r })),
+              ...activeTasks.map((t) => ({ q: t.canvas_q ?? 0, r: t.canvas_r ?? 2 })),
             ];
             const hw = hexWidth() / 2;
             const hh = hexHeight() / 2;

@@ -1,0 +1,17 @@
+.container {
+  width: 100%;
+  height: calc(100vh - 48px);
+  overflow: hidden;
+  position: relative;
+}
+
+.dragging {
+  cursor: grabbing;
+}
+
+.inner {
+  transform-origin: 0 0;
+  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px)) scale(var(--zoom, 1));
+  width: 100%;
+  height: 100%;
+}

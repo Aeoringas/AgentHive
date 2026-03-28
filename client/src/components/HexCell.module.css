@@ -1,0 +1,9 @@
+.cell {
+  position: absolute;
+  left: var(--hex-x);
+  top: var(--hex-y);
+  width: var(--hex-width);
+  height: var(--hex-height);
+  margin-left: calc(var(--hex-width) / -2);
+  margin-top: calc(var(--hex-height) / -2);
+}
