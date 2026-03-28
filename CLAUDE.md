@@ -63,7 +63,18 @@ AgentHive/
         │   ├── Login.tsx
         │   ├── Setup.tsx
         │   └── Canvas.tsx
+        ├── utils/
+        │   └── hex.ts            # 六边形网格数学工具
         ├── components/
+        │   ├── HexCanvas.tsx     # 画布核心（缩放平移）
+        │   ├── HexGrid.tsx       # 网格背景层
+        │   ├── HexCell.tsx       # 通用蜂格容器
+        │   ├── TaskCell.tsx      # 任务蜂格
+        │   ├── FunctionCell.tsx  # 功能蜂格
+        │   ├── LogoCell.tsx      # 中心 Logo
+        │   ├── ColumnHeaders.tsx # 看板列标题
+        │   ├── Toolbar.tsx       # 画布工具���
+        │   └── ZoomControls.tsx  # 缩放控件
         ├── hooks/
         ├── stores/
         └── styles/
