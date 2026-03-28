@@ -74,8 +74,12 @@ AgentHive/
         │   ├── LogoCell.tsx      # 中心 Logo
         │   ├── ColumnHeaders.tsx # 看板列标题
         │   ├── Toolbar.tsx       # 画布工具���
-        │   └── ZoomControls.tsx  # 缩放控件
+        │   ├── ZoomControls.tsx  # 缩放控件
+        │   ├── DependencyLines.tsx # 依赖连线
+        │   ├── SidePanel.tsx     # L1 侧滑面板
+        │   └── MiniMap.tsx       # 小地图
         ├── hooks/
+        │   └── useDrag.ts        # 拖拽吸附 hook
         ├── stores/
         └── styles/
             └── index.css

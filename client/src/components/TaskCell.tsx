@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { Task, TaskStatus } from '@agenthive/shared';
 import HexCell from './HexCell';
 import { hexPath, hexWidth, hexHeight, HEX_SIZE } from '../utils/hex';
+import type { HexCoord } from '../utils/hex';
+import { useDrag } from '../hooks/useDrag';
 
 interface TaskCellProps {
   task: Task;
   onClick: (task: Task) => void;
+  onDragEnd?: (taskId: string, coord: HexCoord) => void;
+  onHover?: (taskId: string | null) => void;
 }
 
 const statusColors: Record<TaskStatus, string> = {
@@ -23,27 +27,36 @@ const w = hexWidth();
 const h = hexHeight();
 const path = hexPath(HEX_SIZE);
 
-export default function TaskCell({ task, onClick }: TaskCellProps) {
+export default function TaskCell({ task, onClick, onDragEnd, onHover }: TaskCellProps) {
   const [hovered, setHovered] = useState(false);
   const col = task.canvas_col ?? 0;
   const row = task.canvas_row ?? 2;
   const color = statusColors[task.status];
   const isIntervention = task.status === 'needs_intervention';
 
+  const { isDragging, dragOffset, handleMouseDown } = useDrag({
+    currentCoord: { col, row },
+    onDragEnd: (coord) => onDragEnd?.(task.id, coord),
+  });
+
   return (
     <HexCell
       col={col}
       row={row}
-      onClick={() => onClick(task)}
+      onClick={() => { if (!isDragging) onClick(task); }}
       style={{
-        transform: hovered ? 'scale(1.05)' : 'scale(1)',
-        transition: 'transform 0.15s ease',
-        zIndex: hovered ? 10 : 1,
+        transform: isDragging && dragOffset
+          ? `translate(${dragOffset.x}px, ${dragOffset.y}px)`
+          : hovered ? 'scale(1.05)' : 'scale(1)',
+        transition: isDragging ? 'none' : 'transform 0.15s ease',
+        zIndex: isDragging ? 100 : hovered ? 10 : 1,
+        opacity: isDragging ? 0.8 : 1,
       }}
     >
       <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseDown={handleMouseDown}
+        onMouseEnter={() => { setHovered(true); onHover?.(task.id); }}
+        onMouseLeave={() => { setHovered(false); onHover?.(null); }}
         style={{ position: 'relative', width: w, height: h }}
       >
         <svg

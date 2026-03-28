@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useRef, useState } from "react";
+import React, { createContext, useCallback, useEffect, useRef, useState } from "react";
 
 export interface CanvasState {
   panX: number;
@@ -14,12 +14,13 @@ export const CanvasContext = createContext<CanvasState>({
 
 interface HexCanvasProps {
   children: React.ReactNode;
+  onStateChange?: (state: CanvasState) => void;
 }
 
 const ZOOM_MIN = 0.3;
 const ZOOM_MAX = 2.0;
 
-export default function HexCanvas({ children }: HexCanvasProps) {
+export default function HexCanvas({ children, onStateChange }: HexCanvasProps) {
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
   const [zoom, setZoom] = useState(1);
@@ -75,6 +76,10 @@ export default function HexCanvas({ children }: HexCanvasProps) {
   const handleMouseUp = useCallback(() => {
     setDragging(false);
   }, []);
+
+  useEffect(() => {
+    onStateChange?.({ panX, panY, zoom });
+  }, [panX, panY, zoom, onStateChange]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.code === "Space") {
