@@ -99,6 +99,10 @@ npm run db:migrate   # 手动执行数据库迁移
 
 SQLite 数据库文件位于 `data/agenthive.db`，启动时自动创建并执行迁移。当前 9 张表：users、projects、ideas、tasks、sessions、messages、subagent_records、notifications、settings。
 
+## 需求文档
+
+`/Users/aeoringas/AI_Storage/REQUIREMENTS_v5.md`（最新版本，v1-v4 为历史版本）
+
 ## 开发规范
 
 本项目由开发框架仓库（ClaudeAgent）的主 Agent 通过 worktree 模式开发。遵循开发框架的 rules 和 skills 约束。
