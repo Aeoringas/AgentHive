@@ -7,9 +7,14 @@
 .hexDefault {
   fill: var(--bg-subtle);
   stroke: var(--wax);
-  stroke-width: 2;
+  stroke-width: 1.5;
   transition: fill var(--duration-fast) var(--ease-default),
               stroke var(--duration-fast) var(--ease-default);
+}
+
+.hexSheen {
+  fill: url(#funcSheen);
+  pointer-events: none;
 }
 
 .inner:hover .hexDefault {
@@ -39,15 +44,11 @@
 
 .label {
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   color: var(--text-secondary);
+  transition: color var(--duration-fast) var(--ease-default);
 }
 
-.cellHover {
-  transform: scale(1.06);
-  box-shadow: var(--shadow-md);
-}
-
-.cellDragging {
-  transition: none !important;
+.inner:hover .label {
+  color: var(--honey-700);
 }

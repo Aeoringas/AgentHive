@@ -176,6 +176,16 @@ const HexCanvas = forwardRef<HexCanvasHandle, HexCanvasProps>(
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
+          <div className={styles.orbs}>
+            <div className={`${styles.orb} ${styles.orb1}`} />
+            <div className={`${styles.orb} ${styles.orb2}`} />
+            <div className={`${styles.orb} ${styles.orb3}`} />
+            <div className={`${styles.orb} ${styles.orb4}`} />
+            <div className={`${styles.orb} ${styles.orb5}`} />
+            <div className={`${styles.orb} ${styles.orb6}`} />
+            <div className={`${styles.orb} ${styles.orb7}`} />
+            <div className={`${styles.orb} ${styles.orb8}`} />
+          </div>
           <div
             ref={innerRef}
             className={styles.inner}

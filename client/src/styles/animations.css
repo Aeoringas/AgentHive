@@ -1,8 +1,8 @@
 @import './variables.css';
 
 @keyframes logoPulse {
-  0%, 100% { opacity: 1.0; }
-  50% { opacity: 0.85; }
+  0%, 100% { opacity: 1.0; filter: brightness(1); }
+  50% { opacity: 0.9; filter: brightness(1.05); }
 }
 
 @keyframes interventionPulse {
@@ -11,8 +11,8 @@
 }
 
 @keyframes honeyWave {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(2px); }
+  0%, 100% { transform: translateX(-3px); opacity: 0.4; }
+  50% { transform: translateX(3px); opacity: 0.6; }
 }
 
 @keyframes sealAndArchive {

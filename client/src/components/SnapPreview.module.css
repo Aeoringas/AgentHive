@@ -1,0 +1,26 @@
+.preview {
+  position: absolute;
+  left: var(--hex-x);
+  top: var(--hex-y);
+  width: var(--hex-width);
+  height: var(--hex-height);
+  margin-left: calc(var(--hex-width) / -2);
+  margin-top: calc(var(--hex-height) / -2);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hex {
+  fill: rgba(254, 243, 199, 0.5);
+  stroke: var(--honey-500, #f59e0b);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}

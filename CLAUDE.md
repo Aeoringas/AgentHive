@@ -97,6 +97,8 @@ AgentHive/
         │   ├── DependencyLines.module.css
         │   ├── SidePanel.tsx     # L1 侧滑面板
         │   ├── SidePanel.module.css
+        │   ├── SnapPreview.tsx   # 拖拽吸附预览
+        │   ├── SnapPreview.module.css
         │   ├── StatusLegend.tsx  # 状态图例
         │   └── StatusLegend.module.css
         ├── hooks/

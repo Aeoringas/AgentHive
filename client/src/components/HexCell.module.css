@@ -6,4 +6,5 @@
   height: var(--hex-height);
   margin-left: calc(var(--hex-width) / -2);
   margin-top: calc(var(--hex-height) / -2);
+  user-select: none;
 }

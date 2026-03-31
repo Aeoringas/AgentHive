@@ -10,4 +10,5 @@
   fill: none;
   stroke: var(--wax-light);
   stroke-width: 1;
+  opacity: 0.6;
 }

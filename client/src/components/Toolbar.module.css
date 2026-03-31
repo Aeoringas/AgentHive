@@ -6,6 +6,8 @@
   flex-direction: column;
   gap: 6px;
   z-index: 100;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn {
@@ -22,6 +24,8 @@
   font-weight: var(--weight-medium);
   color: var(--text-secondary);
   padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
   transition: background var(--duration-fast) var(--ease-default),
               border-color var(--duration-fast) var(--ease-default);
 }
