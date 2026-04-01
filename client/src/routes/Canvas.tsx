@@ -15,6 +15,7 @@ import StatusLegend from "../components/StatusLegend";
 import TopBar from "../components/TopBar";
 import ArchiveBar from "../components/ArchiveBar";
 import CommitOverlay from "../components/CommitOverlay";
+import UsageOverlay from "../components/UsageOverlay";
 import { hexHeight, hexWidth, hexToPixel, ringCoords } from "../utils/hex";
 import type { HexCoord } from "../utils/hex";
 
@@ -181,6 +182,7 @@ export function Canvas() {
   const [snapPreview, setSnapPreview] = useState<HexCoord | null>(null);
   const [funcPositions, setFuncPositions] = useState<Record<string, HexCoord>>({});
   const [commitOverlayVisible, setCommitOverlayVisible] = useState(false);
+  const [usageOverlayVisible, setUsageOverlayVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HexCanvasHandle>(null);
 
@@ -243,7 +245,11 @@ export function Canvas() {
       .then(res => res.json())
       .then(result => {
         if (result.project) {
-          setProjects(prev => [...prev, result.project]);
+          setProjects(prev => {
+            const source = prev.filter(p => p.is_source);
+            const rest = prev.filter(p => !p.is_source);
+            return [...source, result.project, ...rest];
+          });
           setProjectId(result.project.id);
         }
       })
@@ -270,6 +276,7 @@ export function Canvas() {
 
   const handleFuncClick = useCallback((label: string) => {
     if (label === '\u63d0\u4ea4') setCommitOverlayVisible(true);
+    if (label === '\u7528\u91cf') setUsageOverlayVisible(true);
   }, []);
 
   function handleLogout() {
@@ -320,6 +327,11 @@ export function Canvas() {
           visible={commitOverlayVisible}
           onClose={() => setCommitOverlayVisible(false)}
           projectId={projectId}
+        />
+
+        <UsageOverlay
+          visible={usageOverlayVisible}
+          onClose={() => setUsageOverlayVisible(false)}
         />
 
         <StatusLegend />

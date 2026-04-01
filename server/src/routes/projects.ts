@@ -1,7 +1,8 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { readdirSync, statSync, existsSync } from 'fs';
+import { readdirSync, statSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join, basename } from 'path';
+import { execSync } from 'child_process';
 import db from '../database/connection.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 
@@ -54,6 +55,16 @@ router.post('/', (req: AuthRequest, res: Response) => {
     return;
   }
 
+  if (!existsSync(repo_path)) {
+    try {
+      mkdirSync(repo_path, { recursive: true });
+      execSync('git init', { cwd: repo_path });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to create project directory' });
+      return;
+    }
+  }
+
   const id = uuidv4();
   db.prepare(
     'INSERT INTO projects (id, name, description, repo_path, is_source) VALUES (?, ?, ?, ?, ?)'
@@ -93,6 +104,15 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   if (project.is_source) {
     res.status(403).json({ error: 'Cannot delete source project' });
     return;
+  }
+
+  if (existsSync(project.repo_path)) {
+    try {
+      rmSync(project.repo_path, { recursive: true, force: true });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to delete project directory' });
+      return;
+    }
   }
 
   db.prepare('DELETE FROM projects WHERE id = ?').run(id);
