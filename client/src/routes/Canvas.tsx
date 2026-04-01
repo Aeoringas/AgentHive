@@ -147,7 +147,7 @@ function CanvasInner({
             key={def.label}
             coord={pos}
             label={def.label}
-            onClick={() => {}}
+            onClick={() => onFuncClick(def.label)}
             onDragEnd={onFuncDragEnd}
             onSnapPreview={onSnapPreview}
           />
@@ -180,6 +180,7 @@ export function Canvas() {
   const [canvasState, setCanvasState] = useState({ panX: 0, panY: 0, zoom: 1 });
   const [snapPreview, setSnapPreview] = useState<HexCoord | null>(null);
   const [funcPositions, setFuncPositions] = useState<Record<string, HexCoord>>({});
+  const [commitOverlayVisible, setCommitOverlayVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HexCanvasHandle>(null);
 
@@ -219,6 +220,20 @@ export function Canvas() {
     setSnapPreview(null);
   }, []);
 
+  const handleProjectChange = useCallback((id: string) => {
+    setProjectId(id);
+    fetch(`/api/projects/${id}/access`, { method: 'POST', headers: getAuthHeaders() })
+      .then(() => {
+        setProjects(prev => {
+          const source = prev.filter(p => p.is_source);
+          const target = prev.find(p => p.id === id && !p.is_source);
+          const rest = prev.filter(p => !p.is_source && p.id !== id);
+          return [...source, ...(target ? [target] : []), ...rest];
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   const handleCreateProject = useCallback((data: { name: string; description: string; repo_path: string }) => {
     fetch('/api/projects', {
       method: 'POST',
@@ -253,6 +268,10 @@ export function Canvas() {
       .catch(() => {});
   }, [projectId]);
 
+  const handleFuncClick = useCallback((label: string) => {
+    if (label === '\u63d0\u4ea4') setCommitOverlayVisible(true);
+  }, []);
+
   function handleLogout() {
     localStorage.removeItem("token");
     navigate("/login");
@@ -269,7 +288,7 @@ export function Canvas() {
       <TopBar
         projects={projects}
         currentProjectId={projectId}
-        onProjectChange={setProjectId}
+        onProjectChange={handleProjectChange}
         onCreateProject={handleCreateProject}
         onDeleteProject={handleDeleteProject}
         onLogout={handleLogout}
@@ -287,6 +306,7 @@ export function Canvas() {
             onTaskClick={setSelectedTask}
             onTaskHover={setHoveredTaskId}
             onTaskDragEnd={handleTaskDragEnd}
+            onFuncClick={handleFuncClick}
             onFuncDragEnd={handleFuncDragEnd}
             onSnapPreview={setSnapPreview}
           />
@@ -295,6 +315,12 @@ export function Canvas() {
         <ArchiveBar tasks={completedTasks} onTaskClick={setSelectedTask} />
 
         <SidePanel task={selectedTask} onClose={() => setSelectedTask(null)} />
+
+        <CommitOverlay
+          visible={commitOverlayVisible}
+          onClose={() => setCommitOverlayVisible(false)}
+          projectId={projectId}
+        />
 
         <StatusLegend />
 

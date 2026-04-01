@@ -11,8 +11,18 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/', (_req: AuthRequest, res: Response) => {
-  const projects = db.prepare('SELECT * FROM projects ORDER BY created_at DESC').all();
+  const projects = db.prepare('SELECT * FROM projects ORDER BY is_source DESC, last_accessed_at DESC').all();
   res.json({ projects });
+});
+
+router.post('/:id/access', (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const result = db.prepare("UPDATE projects SET last_accessed_at = datetime('now') WHERE id = ?").run(id);
+  if (result.changes === 0) {
+    res.status(404).json({ error: 'Project not found' });
+    return;
+  }
+  res.json({ success: true });
 });
 
 router.get('/discover', (_req: AuthRequest, res: Response) => {

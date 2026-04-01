@@ -52,7 +52,8 @@ AgentHive/
 │       │   ├── projects.ts
 │       │   ├── tasks.ts
 │       │   ├── sessions.ts
-│       │   └── settings.ts
+│       │   ├── settings.ts
+│       │   └── git.ts
 │       └── websocket/
 │           └── index.ts
 └── client/                   # 前端
@@ -102,7 +103,11 @@ AgentHive/
         │   ├── SnapPreview.tsx   # 拖拽吸附预览
         │   ├── SnapPreview.module.css
         │   ├── StatusLegend.tsx  # 状态图例
-        │   └── StatusLegend.module.css
+        │   ├── StatusLegend.module.css
+        │   ├── Overlay.tsx       # L2 浮层通用容器
+        │   ├── Overlay.module.css
+        │   ├── CommitOverlay.tsx # Git 提交记录浮层
+        │   └── CommitOverlay.module.css
         ├── hooks/
         │   └── useDrag.ts        # 拖拽吸附 hook
         ├── stores/

@@ -6,4 +6,5 @@ export interface Project {
   is_source: boolean;
   created_at: string;
   updated_at: string;
+  last_accessed_at: string;
 }
