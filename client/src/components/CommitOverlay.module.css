@@ -1,0 +1,287 @@
+.layout {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+
+/* -- 左栏：提交列表 -- */
+
+.left {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-light);
+}
+
+.toolbar {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  font-size: var(--text-sm);
+  background: var(--bg-base);
+  outline: none;
+  color: var(--text-primary);
+  box-sizing: border-box;
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.searchInput:focus {
+  border-color: var(--honey-500);
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.commitItem {
+  display: block;
+  width: 100%;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+.commitItem:hover {
+  background: var(--honey-50);
+}
+
+.commitItemActive {
+  background: var(--honey-100);
+}
+
+.commitItemActive:hover {
+  background: var(--honey-100);
+}
+
+.commitSubject {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: var(--space-1);
+}
+
+.commitMeta {
+  display: flex;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.commitHash {
+  font-family: var(--font-mono);
+  color: var(--honey-700);
+}
+
+/* -- 右栏：详情 -- */
+
+.right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.detailEmpty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* -- 简介 -- */
+
+.summary {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.summarySubject {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-2);
+}
+
+.summaryBody {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-normal);
+  white-space: pre-wrap;
+  margin-bottom: var(--space-2);
+}
+
+.summaryMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.summaryHash {
+  font-family: var(--font-mono);
+  color: var(--honey-700);
+  background: var(--honey-50);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.statAdd {
+  color: var(--status-completed);
+  font-family: var(--font-mono);
+}
+
+.statDel {
+  color: var(--status-intervention);
+  font-family: var(--font-mono);
+}
+
+/* -- 文件列表 + diff 分栏 -- */
+
+.changeArea {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.fileList {
+  width: 220px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-light);
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--text-xs);
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+.fileRow:hover {
+  background: var(--honey-50);
+}
+
+.fileRowActive {
+  background: var(--honey-100);
+}
+
+.fileRowActive:hover {
+  background: var(--honey-100);
+}
+
+.filePath {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.fileStats {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+}
+
+/* -- diff 内容 -- */
+
+.diffPane {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+.diffEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.patchContent {
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.diffCtx {
+  padding: 0 var(--space-4);
+}
+
+.diffAdd {
+  padding: 0 var(--space-4);
+  background: rgba(101, 163, 13, 0.12);
+  color: #3d6b00;
+}
+
+.diffDel {
+  padding: 0 var(--space-4);
+  background: rgba(220, 38, 38, 0.10);
+  color: #a11;
+}
+
+.diffHunk {
+  padding: var(--space-1) var(--space-4);
+  background: rgba(245, 158, 11, 0.10);
+  color: var(--honey-700);
+  font-weight: var(--weight-medium);
+}
+
+.diffMeta {
+  padding: 0 var(--space-4);
+  color: var(--text-muted);
+}
