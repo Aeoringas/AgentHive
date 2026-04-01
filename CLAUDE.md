@@ -85,7 +85,9 @@ AgentHive/
         │   ├── LogoCell.module.css
         │   ├── HoneyFill.tsx     # 蜜填充组件
         │   ├── HoneyFill.module.css
-        │   ├── TopBar.tsx        # 顶栏
+        │   ├── Modal.tsx          # 通用弹窗组件
+        │   ├── Modal.module.css
+        │   ├── TopBar.tsx        # 顶栏（含项目切换器）
         │   ├── TopBar.module.css
         │   ├── ArchiveBar.tsx    # 归档栏
         │   ├── ArchiveBar.module.css
