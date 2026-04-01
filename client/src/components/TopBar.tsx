@@ -3,6 +3,11 @@ import type { Project } from '@agenthive/shared';
 import Modal, { ModalLabel, ModalInput, ModalText, ModalButton } from './Modal';
 import styles from './TopBar.module.css';
 
+interface DiscoveredProject {
+  name: string;
+  path: string;
+}
+
 interface TopBarProps {
   projects: Project[];
   currentProjectId: string | null;
@@ -14,8 +19,14 @@ interface TopBarProps {
 
 type ModalState = null | 'create' | { type: 'delete'; project: Project };
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+}
+
 export default function TopBar({ projects, currentProjectId, onProjectChange, onCreateProject, onDeleteProject, onLogout }: TopBarProps) {
   const [open, setOpen] = useState(false);
+  const [discovered, setDiscovered] = useState<DiscoveredProject[]>([]);
   const [modal, setModal] = useState<ModalState>(null);
   const [form, setForm] = useState({ name: '', description: '', repo_path: '' });
   const [confirmName, setConfirmName] = useState('');
@@ -24,6 +35,11 @@ export default function TopBar({ projects, currentProjectId, onProjectChange, on
 
   useEffect(() => {
     if (!open) return;
+    fetch('/api/projects/discover', { headers: getAuthHeaders() })
+      .then(res => res.json())
+      .then(data => setDiscovered(data.discovered ?? []))
+      .catch(() => {});
+
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -43,6 +59,11 @@ export default function TopBar({ projects, currentProjectId, onProjectChange, on
     if (!form.name.trim() || !form.repo_path.trim()) return;
     onCreateProject({ name: form.name.trim(), description: form.description.trim(), repo_path: form.repo_path.trim() });
     closeModal();
+  }
+
+  function handleAddDiscovered(d: DiscoveredProject) {
+    onCreateProject({ name: d.name, description: '', repo_path: d.path });
+    setOpen(false);
   }
 
   function handleDelete(project: Project) {
@@ -99,6 +120,22 @@ export default function TopBar({ projects, currentProjectId, onProjectChange, on
                   </div>
                 </div>
               ))}
+              {discovered.length > 0 && (
+                <>
+                  <div className={styles.dropdownDivider} />
+                  <div className={styles.sectionLabel}>发现的仓库</div>
+                  {discovered.map(d => (
+                    <button
+                      key={d.path}
+                      className={styles.dropdownItem}
+                      onClick={() => handleAddDiscovered(d)}
+                    >
+                      <span>{d.name}</span>
+                      <span className={styles.addTag}>添加</span>
+                    </button>
+                  ))}
+                </>
+              )}
               <div className={styles.dropdownDivider} />
               <button
                 className={styles.dropdownItem}

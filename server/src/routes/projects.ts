@@ -1,7 +1,11 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { readdirSync, statSync, existsSync } from 'fs';
+import { join, basename } from 'path';
 import db from '../database/connection.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+
+const SCAN_ROOT = '/Users/aeoringas/AI_Storage';
 
 const router = Router();
 router.use(authMiddleware);
@@ -9,6 +13,28 @@ router.use(authMiddleware);
 router.get('/', (_req: AuthRequest, res: Response) => {
   const projects = db.prepare('SELECT * FROM projects ORDER BY created_at DESC').all();
   res.json({ projects });
+});
+
+router.get('/discover', (_req: AuthRequest, res: Response) => {
+  const registered = db.prepare('SELECT repo_path FROM projects').all() as { repo_path: string }[];
+  const registeredPaths = new Set(registered.map(p => p.repo_path));
+
+  const discovered: { name: string; path: string }[] = [];
+  try {
+    const entries = readdirSync(SCAN_ROOT);
+    for (const entry of entries) {
+      const fullPath = join(SCAN_ROOT, entry);
+      try {
+        if (!statSync(fullPath).isDirectory()) continue;
+        if (registeredPaths.has(fullPath)) continue;
+        if (existsSync(join(fullPath, '.git'))) {
+          discovered.push({ name: basename(fullPath), path: fullPath });
+        }
+      } catch { /* skip inaccessible */ }
+    }
+  } catch { /* scan root inaccessible */ }
+
+  res.json({ discovered });
 });
 
 router.post('/', (req: AuthRequest, res: Response) => {
