@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Task, TaskStatus } from "@agenthive/shared";
+import { Task, TaskStatus, Project } from "@agenthive/shared";
 import HexCanvas, { type HexCanvasHandle } from "../components/HexCanvas";
 import HexGrid from "../components/HexGrid";
 import LogoCell from "../components/LogoCell";
@@ -14,6 +14,7 @@ import ZoomControls from "../components/ZoomControls";
 import StatusLegend from "../components/StatusLegend";
 import TopBar from "../components/TopBar";
 import ArchiveBar from "../components/ArchiveBar";
+import CommitOverlay from "../components/CommitOverlay";
 import { hexHeight, hexWidth, hexToPixel, ringCoords } from "../utils/hex";
 import type { HexCoord } from "../utils/hex";
 
@@ -116,6 +117,7 @@ function CanvasInner({
   onTaskClick,
   onTaskHover,
   onTaskDragEnd,
+  onFuncClick,
   onFuncDragEnd,
   onSnapPreview,
 }: {
@@ -128,6 +130,7 @@ function CanvasInner({
   onTaskClick: (task: Task) => void;
   onTaskHover: (taskId: string | null) => void;
   onTaskDragEnd: (taskId: string, coord: HexCoord) => void;
+  onFuncClick: (label: string) => void;
   onFuncDragEnd: (label: string, coord: HexCoord) => void;
   onSnapPreview: (preview: HexCoord | null) => void;
 }) {
@@ -168,6 +171,7 @@ export function Canvas() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [gridVisible, setGridVisible] = useState(true);
   const [depVisible, setDepVisible] = useState(false);
   const [autoExecute, setAutoExecute] = useState(true);
@@ -183,7 +187,9 @@ export function Canvas() {
     fetch("/api/projects", { headers: getAuthHeaders() })
       .then((res) => res.json())
       .then((data) => {
-        if (data.length > 0) setProjectId(data[0].id);
+        const list: Project[] = data.projects ?? [];
+        setProjects(list);
+        if (list.length > 0) setProjectId(list[0].id);
       })
       .catch(() => {});
   }, []);
@@ -213,6 +219,40 @@ export function Canvas() {
     setSnapPreview(null);
   }, []);
 
+  const handleCreateProject = useCallback((data: { name: string; description: string; repo_path: string }) => {
+    fetch('/api/projects', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    })
+      .then(res => res.json())
+      .then(result => {
+        if (result.project) {
+          setProjects(prev => [...prev, result.project]);
+          setProjectId(result.project.id);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleDeleteProject = useCallback((id: string) => {
+    fetch(`/api/projects/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    })
+      .then(res => {
+        if (!res.ok) return;
+        setProjects(prev => {
+          const next = prev.filter(p => p.id !== id);
+          if (projectId === id && next.length > 0) {
+            setProjectId(next[0].id);
+          }
+          return next;
+        });
+      })
+      .catch(() => {});
+  }, [projectId]);
+
   function handleLogout() {
     localStorage.removeItem("token");
     navigate("/login");
@@ -226,7 +266,14 @@ export function Canvas() {
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <TopBar onLogout={handleLogout} />
+      <TopBar
+        projects={projects}
+        currentProjectId={projectId}
+        onProjectChange={setProjectId}
+        onCreateProject={handleCreateProject}
+        onDeleteProject={handleDeleteProject}
+        onLogout={handleLogout}
+      />
 
       <div ref={containerRef} style={{ flex: 1, position: "relative" }}>
         <HexCanvas ref={canvasRef} onStateChange={setCanvasState} initialPanX={initialPanX} initialPanY={initialPanY}>
