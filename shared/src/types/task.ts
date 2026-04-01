@@ -24,7 +24,6 @@ export interface Task {
   technical_plan: string | null;
   worktree_branch: string | null;
   current_phase: string | null;
-  token_total: number;
   canvas_q: number | null;
   canvas_r: number | null;
   created_at: string;

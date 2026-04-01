@@ -15,7 +15,5 @@ export interface Message {
   subagent_type: string | null;
   content: string;
   attachments: string | null;
-  token_usage: number;
-  generation_time_ms: number;
   created_at: string;
 }

@@ -5,6 +5,8 @@ import projectRoutes from './routes/projects.js';
 import taskRoutes from './routes/tasks.js';
 import sessionRoutes from './routes/sessions.js';
 import settingsRoutes from './routes/settings.js';
+import gitRoutes from './routes/git.js';
+import usageRoutes from './routes/usage.js';
 
 const app = express();
 
@@ -19,5 +21,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/git', gitRoutes);
+app.use('/api/usage', usageRoutes);
 
 export default app;

@@ -145,8 +145,8 @@ function DetailsTab({ task }: { task: Task }) {
             <div className={styles.infoValue}>{new Date(task.created_at).toLocaleString('zh-CN')}</div>
           </div>
           <div>
-            <div className={styles.infoLabel}>Token 用量</div>
-            <div className={styles.infoValue}>{task.token_total.toLocaleString()}</div>
+            <div className={styles.infoLabel}>更新时间</div>
+            <div className={styles.infoValue}>{new Date(task.updated_at).toLocaleString('zh-CN')}</div>
           </div>
         </div>
       </div>

@@ -9,7 +9,6 @@ export interface SubAgentRecord {
   status: SubAgentStatus;
   input_summary: string;
   output_summary: string | null;
-  token_usage: number;
   started_at: string;
   finished_at: string | null;
 }

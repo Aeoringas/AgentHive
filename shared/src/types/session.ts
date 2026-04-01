@@ -8,7 +8,6 @@ export interface Session {
   project_id: string;
   status: 'active' | 'paused' | 'completed';
   is_archived: boolean;
-  token_total: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

@@ -49,7 +49,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 
   const fields = ['name', 'description', 'type', 'status', 'interrupted_status', 'sort_order',
     'requirement_doc', 'technical_plan', 'worktree_branch', 'current_phase',
-    'token_total', 'canvas_q', 'canvas_r'];
+    'canvas_q', 'canvas_r'];
 
   const updates: string[] = [];
   const values: any[] = [];

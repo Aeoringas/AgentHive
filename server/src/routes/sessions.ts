@@ -50,7 +50,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const fields = ['title', 'status', 'is_archived', 'token_total'];
+  const fields = ['title', 'status', 'is_archived'];
   const updates: string[] = [];
   const values: any[] = [];
 
