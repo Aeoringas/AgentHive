@@ -7,6 +7,8 @@ import sessionRoutes from './routes/sessions.js';
 import settingsRoutes from './routes/settings.js';
 import gitRoutes from './routes/git.js';
 import usageRoutes from './routes/usage.js';
+import skillsRoutes from './routes/skills.js';
+import chatRoutes from './routes/chat.js';
 
 const app = express();
 
@@ -23,5 +25,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/git', gitRoutes);
 app.use('/api/usage', usageRoutes);
+app.use('/api/skills', skillsRoutes);
+app.use('/api/chat', chatRoutes);
 
 export default app;

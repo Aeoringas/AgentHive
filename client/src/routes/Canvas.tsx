@@ -16,13 +16,17 @@ import TopBar from "../components/TopBar";
 import ArchiveBar from "../components/ArchiveBar";
 import CommitOverlay from "../components/CommitOverlay";
 import UsageOverlay from "../components/UsageOverlay";
+import FileOverlay from "../components/FileOverlay";
+import SkillOverlay from "../components/SkillOverlay";
+import SettingsOverlay from "../components/SettingsOverlay";
+import ChatOverlay from "../components/ChatOverlay";
 import { hexHeight, hexWidth, hexToPixel, ringCoords } from "../utils/hex";
 import type { HexCoord } from "../utils/hex";
 
 const FUNCTION_DEFS: { q: number; r: number; label: string }[] = [
   { q: 1, r: 0, label: "\u5bf9\u8bdd" },
   { q: 0, r: 1, label: "\u6587\u4ef6" },
-  { q: -1, r: 1, label: "Skill" },
+  { q: -1, r: 1, label: "\u6cbb\u7406" },
   { q: -1, r: 0, label: "\u8bbe\u7f6e" },
   { q: 0, r: -1, label: "\u63d0\u4ea4" },
   { q: 1, r: -1, label: "\u7528\u91cf" },
@@ -183,6 +187,10 @@ export function Canvas() {
   const [funcPositions, setFuncPositions] = useState<Record<string, HexCoord>>({});
   const [commitOverlayVisible, setCommitOverlayVisible] = useState(false);
   const [usageOverlayVisible, setUsageOverlayVisible] = useState(false);
+  const [fileOverlayVisible, setFileOverlayVisible] = useState(false);
+  const [skillOverlayVisible, setSkillOverlayVisible] = useState(false);
+  const [settingsOverlayVisible, setSettingsOverlayVisible] = useState(false);
+  const [chatOverlayVisible, setChatOverlayVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HexCanvasHandle>(null);
 
@@ -277,6 +285,10 @@ export function Canvas() {
   const handleFuncClick = useCallback((label: string) => {
     if (label === '\u63d0\u4ea4') setCommitOverlayVisible(true);
     if (label === '\u7528\u91cf') setUsageOverlayVisible(true);
+    if (label === '\u6587\u4ef6') setFileOverlayVisible(true);
+    if (label === '\u6cbb\u7406') setSkillOverlayVisible(true);
+    if (label === '\u8bbe\u7f6e') setSettingsOverlayVisible(true);
+    if (label === '\u5bf9\u8bdd') setChatOverlayVisible(true);
   }, []);
 
   function handleLogout() {
@@ -332,6 +344,29 @@ export function Canvas() {
         <UsageOverlay
           visible={usageOverlayVisible}
           onClose={() => setUsageOverlayVisible(false)}
+        />
+
+        <FileOverlay
+          visible={fileOverlayVisible}
+          onClose={() => setFileOverlayVisible(false)}
+          projectId={projectId}
+        />
+
+        <SkillOverlay
+          visible={skillOverlayVisible}
+          onClose={() => setSkillOverlayVisible(false)}
+          projectId={projectId}
+        />
+
+        <SettingsOverlay
+          visible={settingsOverlayVisible}
+          onClose={() => setSettingsOverlayVisible(false)}
+        />
+
+        <ChatOverlay
+          visible={chatOverlayVisible}
+          onClose={() => setChatOverlayVisible(false)}
+          projectId={projectId}
         />
 
         <StatusLegend />

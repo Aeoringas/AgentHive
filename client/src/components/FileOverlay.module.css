@@ -1,0 +1,165 @@
+.layout {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+
+/* -- 左侧文件树 -- */
+
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-light);
+  padding: var(--space-1) 0;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.treeItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-1) var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--text-xs);
+  color: var(--text-primary);
+  transition: background var(--duration-fast) var(--ease-default);
+  white-space: nowrap;
+}
+
+.treeItem:hover {
+  background: var(--honey-50);
+}
+
+.treeItemActive {
+  background: var(--honey-100);
+}
+
+.treeItemActive:hover {
+  background: var(--honey-100);
+}
+
+.treeIcon {
+  width: 12px;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.treeName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.statusBadge {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  padding: 0 var(--space-1);
+  border-radius: 2px;
+}
+
+.statusNew {
+  color: var(--status-completed);
+  background: rgba(101, 163, 13, 0.12);
+}
+
+.statusMod {
+  color: var(--honey-700);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.statusDel {
+  color: var(--status-intervention);
+  background: rgba(220, 38, 38, 0.10);
+}
+
+/* -- 右侧内容 -- */
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.fileHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-subtle);
+  flex-shrink: 0;
+}
+
+.filePath {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.saveBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-base);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.saveBtnActive {
+  opacity: 1;
+  cursor: pointer;
+  color: var(--text-inverse);
+  background: var(--honey-500);
+  border-color: var(--honey-600);
+}
+
+.saveBtnActive:hover {
+  background: var(--honey-600);
+}
+
+.editor {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  white-space: pre;
+  tab-size: 2;
+  overflow: auto;
+}

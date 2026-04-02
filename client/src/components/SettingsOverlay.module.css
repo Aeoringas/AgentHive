@@ -1,0 +1,178 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-6);
+  overflow-y: auto;
+  height: 100%;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* -- 分组 -- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-2) 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* -- 字段行 -- */
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-light);
+  gap: var(--space-4);
+}
+
+.field:last-child {
+  border-bottom: none;
+}
+
+.fieldLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+}
+
+.fieldDesc {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.fieldRight {
+  flex-shrink: 0;
+}
+
+/* -- 输入控件 -- */
+
+.numInput {
+  width: 72px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background: var(--bg-base);
+  outline: none;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.numInput:focus {
+  border-color: var(--honey-500);
+}
+
+.selectInput {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background: var(--bg-base);
+  outline: none;
+  min-width: 120px;
+}
+
+.selectInput:focus {
+  border-color: var(--honey-500);
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.inputSuffix {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* -- Toggle -- */
+
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  border: none;
+  background: var(--wax);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+.toggleOn {
+  background: var(--honey-500);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform var(--duration-fast) var(--ease-default);
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(18px);
+}
+
+/* -- 底部保存 -- */
+
+.footer {
+  padding: var(--space-3) 0;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.saveBtn {
+  padding: var(--space-2) var(--space-5);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--honey-500);
+  color: var(--text-inverse);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+.saveBtn:hover {
+  background: var(--honey-600);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

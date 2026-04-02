@@ -1,6 +1,8 @@
 import { Router, Response } from 'express';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { readFileSync, writeFileSync } from 'fs';
+import { join, relative, resolve } from 'path';
 import db from '../database/connection.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 
@@ -117,6 +119,136 @@ router.get('/commits/:hash', async (req: AuthRequest, res: Response) => {
     const files = parseNumstat(numstatRaw);
 
     res.json({ commit, files, patch: patchRaw });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -- 文件浏览 --
+
+router.get('/tree', async (req: AuthRequest, res: Response) => {
+  const { project_id } = req.query;
+  if (!project_id) { res.status(400).json({ error: 'project_id required' }); return; }
+
+  const project = findProject(project_id);
+  if (!project) { res.status(404).json({ error: 'Project not found' }); return; }
+
+  try {
+    // git ls-files 获取已跟踪文件
+    const tracked = await git(project.repo_path, ['ls-files']);
+    // git status --porcelain 获取修改状态
+    const statusRaw = await git(project.repo_path, ['status', '--porcelain']).catch(() => '');
+    const statusMap: Record<string, string> = {};
+    for (const line of statusRaw.split('\n').filter(Boolean)) {
+      const code = line.slice(0, 2).trim();
+      const filePath = line.slice(3);
+      statusMap[filePath] = code;
+    }
+
+    // 构建树
+    const files = tracked.split('\n').filter(Boolean);
+    // 补上未跟踪的新文件
+    for (const [fp, code] of Object.entries(statusMap)) {
+      if (code === '??' && !files.includes(fp)) files.push(fp);
+    }
+
+    interface TreeNode {
+      name: string;
+      path: string;
+      type: 'file' | 'dir';
+      status?: string;
+      children?: TreeNode[];
+    }
+
+    const root: TreeNode = { name: '', path: '', type: 'dir', children: [] };
+
+    for (const fp of files) {
+      const parts = fp.split('/');
+      let current = root;
+      for (let i = 0; i < parts.length; i++) {
+        const isFile = i === parts.length - 1;
+        const name = parts[i];
+        const path = parts.slice(0, i + 1).join('/');
+
+        if (!current.children) current.children = [];
+        let child = current.children.find(c => c.name === name);
+        if (!child) {
+          child = { name, path, type: isFile ? 'file' : 'dir' };
+          if (!isFile) child.children = [];
+          current.children.push(child);
+        }
+        if (isFile && statusMap[fp]) {
+          child.status = statusMap[fp];
+        }
+        current = child;
+      }
+    }
+
+    // 排序：目录在前，文件在后，各自按名称排序
+    function sortTree(node: TreeNode) {
+      if (node.children) {
+        node.children.sort((a, b) => {
+          if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        });
+        node.children.forEach(sortTree);
+      }
+    }
+    sortTree(root);
+
+    res.json({ tree: root.children || [] });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/file', async (req: AuthRequest, res: Response) => {
+  const { project_id, path: filePath } = req.query;
+  if (!project_id || !filePath) {
+    res.status(400).json({ error: 'project_id and path required' });
+    return;
+  }
+
+  const project = findProject(project_id);
+  if (!project) { res.status(404).json({ error: 'Project not found' }); return; }
+
+  const absPath = resolve(join(project.repo_path, String(filePath)));
+  if (!absPath.startsWith(resolve(project.repo_path))) {
+    res.status(403).json({ error: 'Path traversal not allowed' });
+    return;
+  }
+
+  try {
+    const content = readFileSync(absPath, 'utf-8');
+    res.json({ content, path: String(filePath) });
+  } catch (err: any) {
+    if (err.code === 'ENOENT') {
+      res.status(404).json({ error: 'File not found' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
+  }
+});
+
+router.put('/file', (req: AuthRequest, res: Response) => {
+  const { project_id, path: filePath, content } = req.body;
+  if (!project_id || !filePath || content === undefined) {
+    res.status(400).json({ error: 'project_id, path, and content required' });
+    return;
+  }
+
+  const project = findProject(project_id);
+  if (!project) { res.status(404).json({ error: 'Project not found' }); return; }
+
+  const absPath = resolve(join(project.repo_path, String(filePath)));
+  if (!absPath.startsWith(resolve(project.repo_path))) {
+    res.status(403).json({ error: 'Path traversal not allowed' });
+    return;
+  }
+
+  try {
+    writeFileSync(absPath, content, 'utf-8');
+    res.json({ success: true, path: filePath });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
